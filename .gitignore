@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+!.env.example
+
+# local embedded postgres data
+/.local/
+
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/.next-e2e/
+
+# AI-agent skill files added by `prisma init` / local tooling
+/.agents/
+/.claude/
+/.windsurf/
+/skills-lock.json

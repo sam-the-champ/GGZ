@@ -1,26 +1,201 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
+/* ─── Brand palette ─────────────────────────────────────────────────────────
+   Ink (deep sea navy), Sand (warm cream), Sunset (orange), Sun (yellow),
+   Palm (green), Lagoon (teal). Flyer colours, used with restraint. */
 @theme inline {
+  --color-ink: #0e1b26;
+  --color-ink-soft: #1c3142;
+  --color-sand: #fbf5ec;
+  --color-sand-deep: #f1e4d1;
+  --color-sunset: #f26b1d;
+  --color-sunset-deep: #c94f0c;
+  --color-sun: #ffc83d;
+  --color-palm: #1e7a57;
+  --color-lagoon: #2aa3a0;
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.875rem;
+  --background: #fbf5ec;
+  --foreground: #0e1b26;
+  --card: #ffffff;
+  --card-foreground: #0e1b26;
+  --popover: #ffffff;
+  --popover-foreground: #0e1b26;
+  --primary: #0e1b26;
+  --primary-foreground: #fbf5ec;
+  --secondary: #f1e4d1;
+  --secondary-foreground: #0e1b26;
+  --muted: #f1e4d1;
+  --muted-foreground: #4f5d69;
+  --accent: #f1e4d1;
+  --accent-foreground: #0e1b26;
+  --destructive: #b42318;
+  --border: #e4d6c2;
+  --input: #d8c8b2;
+  --ring: #f26b1d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-sunset);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Character & scene animations ─────────────────────────────────────── */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes arm-raise {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(8deg); }
+}
+@keyframes arm-raise-r {
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(-8deg); }
+}
+@keyframes page-flip {
+  0%, 35% { transform: scaleX(1); }
+  50%, 85% { transform: scaleX(-1); }
+  100% { transform: scaleX(1); }
+}
+@keyframes strum {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-14deg); }
+}
+@keyframes note-rise {
+  0% { transform: translateY(0) scale(0.8); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-46px) scale(1.05); opacity: 0; }
+}
+@keyframes ball-bounce {
+  0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(0.3, 0, 0.7, 0.4); }
+  50% { transform: translateY(-58px); animation-timing-function: cubic-bezier(0.3, 0.6, 0.7, 1); }
+}
+@keyframes kick {
+  0%, 40%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-22deg); }
+}
+@keyframes glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.94); }
+  50% { opacity: 0.8; transform: scale(1.06); }
+}
+@keyframes blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes wave-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes float-chip {
+  0%, 100% { transform: translateY(0) rotate(var(--chip-rot, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--chip-rot, 0deg)); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes flame {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  33% { transform: scaleY(1.12) scaleX(0.94); }
+  66% { transform: scaleY(0.92) scaleX(1.05); }
+}
+@keyframes sun-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.fx { transform-box: fill-box; }
+.anim-bob { animation: bob 4.2s ease-in-out infinite; }
+.anim-sway { animation: sway 5s ease-in-out infinite; transform-origin: 50% 100%; }
+.anim-arm-l { animation: arm-raise 2.6s ease-in-out infinite; transform-origin: 100% 100%; }
+.anim-arm-r { animation: arm-raise-r 2.6s ease-in-out infinite; transform-origin: 0% 100%; }
+.anim-page { animation: page-flip 5.5s ease-in-out infinite; transform-origin: 0% 50%; }
+.anim-strum { animation: strum 0.9s ease-in-out infinite; transform-origin: 0% 0%; }
+.anim-note { animation: note-rise 3s ease-out infinite; }
+.anim-ball { animation: ball-bounce 1.6s infinite; }
+.anim-kick { animation: kick 1.6s ease-in-out infinite; transform-origin: 50% 0%; }
+.anim-glow { animation: glow 3.4s ease-in-out infinite; transform-origin: 50% 50%; }
+.anim-blink { animation: blink 4.8s infinite; transform-origin: 50% 50%; }
+.anim-waves { animation: wave-drift 14s linear infinite; }
+.anim-waves-slow { animation: wave-drift 22s linear infinite; }
+.anim-chip { animation: float-chip 5s ease-in-out infinite; }
+.anim-marquee { animation: marquee 32s linear infinite; }
+.anim-flame { animation: flame 0.8s ease-in-out infinite; transform-origin: 50% 100%; }
+.anim-sun { animation: sun-pulse 6s ease-in-out infinite; transform-origin: 50% 50%; }
+
+.delay-1 { animation-delay: -0.8s; }
+.delay-2 { animation-delay: -1.6s; }
+.delay-3 { animation-delay: -2.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Subtle paper grain for sand sections. */
+.grain {
+  background-image: radial-gradient(rgba(14, 27, 38, 0.05) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff; }
 }

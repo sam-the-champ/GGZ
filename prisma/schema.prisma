@@ -1,0 +1,270 @@
+// GGZ Camp registration platform — PostgreSQL schema.
+//
+// Money is always stored as integer kobo (1 NGN = 100 kobo).
+// Personal data retention rules are documented in docs/DATA-RETENTION.md.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Event configuration ────────────────────────────────────────────────────
+
+model Event {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  name               String
+  theme              String
+  startDate          DateTime @db.Date
+  endDate            DateTime @db.Date
+  venue              String
+  // Null until organisers confirm. Registration cannot open while null.
+  feeKobo            Int?
+  currency           String   @default("NGN")
+  // Null until organisers confirm. Registration cannot open while null.
+  capacity           Int?
+  registrationOpen   Boolean  @default(false)
+  // How long an unpaid checkout holds a place.
+  reservationMinutes Int      @default(30)
+  // Plain-text, organiser-approved copy shown before payment.
+  feeCovers          String?
+  refundPolicy       String?
+  // Age policy — null means "not yet confirmed".
+  minimumAge         Int?
+  // Participants younger than this need guardian consent.
+  guardianConsentAge Int      @default(18)
+  termsVersion       String   @default("2026-draft-1")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  attempts      RegistrationAttempt[]
+  registrations Registration[]
+}
+
+// ─── Payment-first registration lifecycle ───────────────────────────────────
+
+enum PaymentStatus {
+  INITIATED // attempt created, Paystack transaction not yet created
+  PENDING // checkout created / provider reports pending or ongoing
+  PAID // verified success with matching amount + currency
+  FAILED
+  ABANDONED // checkout cancelled or never completed
+  MISMATCH // provider success, but amount/currency did not match — needs review
+  REVERSED // refunded / reversed at the provider
+}
+
+enum ReservationStatus {
+  ACTIVE // holding a place until reservationExpiresAt
+  RELEASED // payment failed / cancelled — place returned
+  EXPIRED // timed out without payment
+  HELD // paid — place permanently held
+  OVERFLOW // paid after expiry while event was full — needs organiser action
+}
+
+model RegistrationAttempt {
+  id                   String            @id @default(cuid())
+  // Public-safe reference shown to participants (no personal data).
+  publicRef            String            @unique
+  // Reference sent to Paystack. Unique and unpredictable.
+  paymentReference     String            @unique
+  eventId              String
+  event                Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  // Email used for Paystack checkout and recovery links.
+  email                String
+  // Amount fixed when the attempt was created; later fee changes never alter it.
+  amountKobo           Int
+  currency             String
+  paymentStatus        PaymentStatus     @default(INITIATED)
+  reservationStatus    ReservationStatus @default(ACTIVE)
+  reservationExpiresAt DateTime
+  // Paystack access code for resuming the same checkout (avoids double charges).
+  paystackAccessCode   String?
+  authorizationUrl     String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  payment      Payment?
+  registration Registration?
+  tokens       ContinuationToken[]
+
+  @@index([eventId, reservationStatus, reservationExpiresAt])
+  @@index([eventId, paymentStatus])
+  @@index([email])
+}
+
+enum TokenPurpose {
+  SESSION // httpOnly cookie that lets the browser continue the flow
+  EMAIL_LINK // single-use recovery link exchanged for a SESSION token
+}
+
+// Opaque secrets are only ever stored hashed (SHA-256).
+model ContinuationToken {
+  id        String              @id @default(cuid())
+  tokenHash String              @unique
+  purpose   TokenPurpose
+  attemptId String
+  attempt   RegistrationAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@index([attemptId])
+  @@index([expiresAt])
+}
+
+enum VerificationSource {
+  CALLBACK
+  WEBHOOK
+  RECOVERY
+  RECONCILE
+}
+
+// One verified provider record per attempt. Never stores card data.
+model Payment {
+  id                    String              @id @default(cuid())
+  attemptId             String              @unique
+  attempt               RegistrationAttempt @relation(fields: [attemptId], references: [id], onDelete: Restrict)
+  reference             String              @unique
+  providerTransactionId String?             @unique
+  expectedAmountKobo    Int
+  expectedCurrency      String
+  paidAmountKobo        Int?
+  paidCurrency          String?
+  status                PaymentStatus
+  channel               String?
+  gatewayResponse       String?
+  customerEmail         String?
+  paidAt                DateTime?
+  verifiedAt            DateTime
+  verificationSource    VerificationSource
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  registration Registration?
+
+  @@index([status])
+}
+
+// ─── Participants & registrations ───────────────────────────────────────────
+
+model Participant {
+  id                    String    @id @default(cuid())
+  fullName              String
+  email                 String
+  phone                 String
+  dateOfBirth           DateTime  @db.Date
+  cityOrState           String
+  emergencyContactName  String
+  emergencyContactPhone String
+  // Optional, shared voluntarily under the privacy notice.
+  supportNeeds          String?
+  guardianName          String?
+  guardianPhone         String?
+  guardianEmail         String?
+  guardianConsentAt     DateTime?
+  termsAcceptedAt       DateTime
+  privacyAcceptedAt     DateTime
+  termsVersion          String
+  // Set when personal data has been erased on request / under retention policy.
+  erasedAt              DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  registration Registration?
+
+  @@index([email])
+  @@index([fullName])
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Registration {
+  id                 String             @id @default(cuid())
+  registrationNumber String             @unique
+  eventId            String
+  event              Event              @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  participantId      String             @unique
+  participant        Participant        @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  // One completed registration per paid attempt / verified payment.
+  attemptId          String             @unique
+  attempt            RegistrationAttempt @relation(fields: [attemptId], references: [id], onDelete: Restrict)
+  paymentId          String             @unique
+  payment            Payment            @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  status             RegistrationStatus @default(CONFIRMED)
+  formCompletedAt    DateTime
+  confirmedAt        DateTime
+  confirmationEmailSentAt DateTime?
+  cancelledAt        DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([eventId, status])
+}
+
+// ─── Administration ─────────────────────────────────────────────────────────
+
+enum AdminRole {
+  ADMIN // full access incl. settings
+  VIEWER // read-only dashboard and exports
+}
+
+model AdminUser {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  name                String
+  passwordHash        String
+  role                AdminRole @default(VIEWER)
+  isActive            Boolean   @default(true)
+  failedLoginCount    Int       @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  sessions  AdminSession[]
+  auditLogs AuditLog[]
+}
+
+model AdminSession {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+}
+
+model AuditLog {
+  id          String     @id @default(cuid())
+  actorId     String?
+  actor       AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action      String
+  entityType  String
+  entityId    String?
+  // Before/after values for settings; never secrets or full personal data.
+  details     Json?
+  createdAt   DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+}
+
+// Fixed-window counters for abuse protection (no Redis required).
+model RateLimitBucket {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+  expiresAt   DateTime
+
+  @@index([expiresAt])
+}
