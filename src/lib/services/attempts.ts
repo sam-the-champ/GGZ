@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
+import { env, paystackConfigured } from "@/lib/env";
 import { generateToken, randomCode } from "@/lib/crypto";
 import { initializeTransaction, PaystackError } from "@/lib/paystack/client";
 import { getCapacitySnapshot, getEvent, lockEvent, missingSetup } from "@/lib/services/event";
@@ -44,7 +44,7 @@ export async function initiateRegistration(input: {
   const email = input.email.trim().toLowerCase();
 
   const event = await getEvent();
-  if (!event || missingSetup(event).length > 0) return { kind: "not_configured" };
+  if (!event || missingSetup(event).length > 0 || !paystackConfigured()) return { kind: "not_configured" };
   if (!event.registrationOpen) return { kind: "closed" };
 
   // 1. Never ask someone to pay twice: a verified, unfinished payment for this

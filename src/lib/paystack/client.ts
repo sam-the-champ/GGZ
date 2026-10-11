@@ -1,7 +1,7 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
-import { env } from "@/lib/env";
+import { env, paystackConfigured } from "@/lib/env";
 
 const LIVE_BASE_URL = "https://api.paystack.co";
 
@@ -17,7 +17,7 @@ export class PaystackError extends Error {
 
 function secretKey(): string {
   const key = env().PAYSTACK_SECRET_KEY;
-  if (!key || !/^sk_(test|live)_/.test(key)) {
+  if (!key || !paystackConfigured()) {
     throw new PaystackError("Paystack secret key is not configured");
   }
   return key;

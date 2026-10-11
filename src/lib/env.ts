@@ -43,12 +43,16 @@ export function isSecureContext() {
   return env().APP_URL.startsWith("https://");
 }
 
+/** The placeholder shipped in .env.example — never a usable key. */
+export const PLACEHOLDER_PAYSTACK_KEY = "sk_test_replace_me";
+
 export function paystackConfigured() {
   const key = env().PAYSTACK_SECRET_KEY;
-  return Boolean(key && /^sk_(test|live)_/.test(key));
+  return Boolean(key && /^sk_(test|live)_/.test(key) && key !== PLACEHOLDER_PAYSTACK_KEY);
 }
 
 export function paystackMode(): "test" | "live" | "unconfigured" {
+  if (!paystackConfigured()) return "unconfigured";
   const key = env().PAYSTACK_SECRET_KEY ?? "";
   if (key.startsWith("sk_live_")) return "live";
   if (key.startsWith("sk_test_")) return "test";
