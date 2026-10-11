@@ -11,9 +11,25 @@ function createClient() {
   return new PrismaClient({ adapter });
 }
 
-/** Single shared Prisma client per server process. */
-export const db: PrismaClient = globalForPrisma.prisma ?? createClient();
+function getClient(): PrismaClient {
+  if (globalForPrisma.prisma) return globalForPrisma.prisma;
+  const client = createClient();
+  // Reuse one client per server process (and across dev hot reloads).
+  globalForPrisma.prisma = client;
+  return client;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+/**
+ * Single shared Prisma client, created on first use rather than at import
+ * time, so a build without DATABASE_URL can still render pages that fall
+ * back gracefully instead of crashing on module load.
+ */
+export const db: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const client = getClient();
+    const value = Reflect.get(client, prop, client);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
 
 export type Tx = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
