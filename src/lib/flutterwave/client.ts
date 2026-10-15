@@ -89,23 +89,38 @@ export type InitializeInput = {
   meta: Record<string, string>;
   title: string;
   description: string;
+  /** Bank-transfer account numbers stop accepting money after this many seconds. */
+  bankTransferExpirySeconds?: number;
 };
+
+/**
+ * Payment methods shown on the hosted checkout, in order. All three support
+ * NGN. Flutterwave hides any method that isn't enabled on the account, and
+ * this list only applies when "Disable preferred payment methods" is OFF in
+ * Flutterwave → Settings → Business preferences.
+ */
+export const PAYMENT_OPTIONS = ["card", "banktransfer", "ussd"] as const;
+
+export function buildCheckoutRequest(input: InitializeInput) {
+  return {
+    tx_ref: input.reference,
+    amount: koboToMajor(input.amountKobo),
+    currency: input.currency,
+    redirect_url: input.redirectUrl,
+    payment_options: PAYMENT_OPTIONS.join(","),
+    ...(input.bankTransferExpirySeconds
+      ? { bank_transfer_options: { expires: Math.round(input.bankTransferExpirySeconds) } }
+      : {}),
+    customer: { email: input.email },
+    meta: input.meta,
+    customizations: { title: input.title, description: input.description },
+  };
+}
 
 export async function initializeTransaction(input: InitializeInput) {
   const res = await call(
     "/v3/payments",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        tx_ref: input.reference,
-        amount: koboToMajor(input.amountKobo),
-        currency: input.currency,
-        redirect_url: input.redirectUrl,
-        customer: { email: input.email },
-        meta: input.meta,
-        customizations: { title: input.title, description: input.description },
-      }),
-    },
+    { method: "POST", body: JSON.stringify(buildCheckoutRequest(input)) },
     paymentResponse,
   );
 

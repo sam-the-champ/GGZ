@@ -126,6 +126,11 @@ export async function initiateRegistration(input: {
       meta: { attempt_id: attempt.id, public_ref: attempt.publicRef },
       title: `${site.eventName} — ${site.theme}`,
       description: `Registration fee · ${site.dates.label}`,
+      // A bank-transfer account must not outlive the place being held for it.
+      bankTransferExpirySeconds: Math.max(
+        60,
+        Math.floor((attempt.reservationExpiresAt.getTime() - Date.now()) / 1000),
+      ),
     });
     await db.registrationAttempt.update({
       where: { id: attempt.id },

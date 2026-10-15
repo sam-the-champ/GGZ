@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCheckoutRequest,
   isValidWebhookHash,
   koboToMajor,
   majorToKobo,
@@ -104,5 +105,25 @@ describe("configuration", () => {
     delete process.env.FLUTTERWAVE_API_BASE_URL;
     process.env.FLUTTERWAVE_SECRET_KEY = saved;
     resetEnvCache();
+  });
+});
+
+describe("checkout request", () => {
+  it("offers card, bank transfer and USSD, in naira, with a bank-transfer expiry", () => {
+    const body = buildCheckoutRequest({
+      email: "a@b.co",
+      amountKobo: 2_000_000,
+      currency: "NGN",
+      reference: "ggz_ref",
+      redirectUrl: "https://camp.example/register/callback",
+      meta: { attempt_id: "att_1" },
+      title: "GGZ Camp",
+      description: "Fee",
+      bankTransferExpirySeconds: 1800,
+    });
+    expect(body.payment_options).toBe("card,banktransfer,ussd");
+    expect(body.amount).toBe(20000);
+    expect(body.currency).toBe("NGN");
+    expect(body.bank_transfer_options).toEqual({ expires: 1800 });
   });
 });
