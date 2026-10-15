@@ -22,15 +22,45 @@ export type ServerEnv = z.infer<typeof schema>;
 
 let cached: ServerEnv | null = null;
 
+/** Trims whitespace and one pair of surrounding quotes (common when copying from .env into a dashboard). */
+function clean(value: string | undefined): string | undefined {
+  if (value == null) return undefined;
+  const v = value.trim().replace(/^(["'])(.*)\1$/, "$2").trim();
+  return v === "" ? undefined : v;
+}
+
+/**
+ * Normalises raw variables before validation:
+ * - every value is trimmed and unquoted;
+ * - APP_URL may omit the scheme ("camp.example.org" → "https://camp.example.org");
+ * - on Vercel, APP_URL falls back to the project's production domain.
+ */
+export function normaliseEnv(raw: Record<string, string | undefined>): Record<string, string | undefined> {
+  const out: Record<string, string | undefined> = {};
+  for (const key of Object.keys(schema.shape)) out[key] = clean(raw[key]);
+  const vercelHost = clean(raw.VERCEL_PROJECT_PRODUCTION_URL) ?? clean(raw.VERCEL_URL);
+  let appUrl = out.APP_URL ?? (vercelHost ? `https://${vercelHost}` : undefined);
+  if (appUrl && !/^https?:\/\//i.test(appUrl)) appUrl = `https://${appUrl}`;
+  out.APP_URL = appUrl;
+  return out;
+}
+
+/** Problems with the environment, naming variables only — never their values. */
+export function envProblems(raw: Record<string, string | undefined> = process.env): string[] {
+  const parsed = schema.safeParse(normaliseEnv(raw));
+  if (parsed.success) return [];
+  return parsed.error.issues.map((i) => {
+    const name = String(i.path[0] ?? "environment");
+    return raw[name] == null || clean(raw[name]) == null ? `${name} is not set` : `${name}: ${i.message}`;
+  });
+}
+
 /** Validated server environment. Throws a descriptive error on misconfiguration. */
 export function env(): ServerEnv {
   if (cached) return cached;
-  const parsed = schema.safeParse(process.env);
+  const parsed = schema.safeParse(normaliseEnv(process.env));
   if (!parsed.success) {
-    const issues = parsed.error.issues
-      .map((i) => `${i.path.join(".")}: ${i.message}`)
-      .join("; ");
-    throw new Error(`Invalid server environment — ${issues}`);
+    throw new Error(`Invalid server environment — ${envProblems().join("; ")}`);
   }
   cached = parsed.data;
   return cached;
