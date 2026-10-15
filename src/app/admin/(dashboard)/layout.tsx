@@ -4,13 +4,13 @@ import { requireAdminPage } from "@/lib/auth/session";
 import { logoutAction } from "@/app/admin/actions";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { AdminNav } from "@/components/admin/admin-nav";
-import { paystackMode } from "@/lib/env";
+import { paymentsMode } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/admin">) {
   const admin = await requireAdminPage();
-  const mode = paystackMode();
+  const mode = paymentsMode();
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-ink/10 bg-white">
@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/admin"
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${mode === "live" ? "bg-palm/15 text-palm" : mode === "test" ? "bg-sun/50 text-ink" : "bg-destructive/10 text-destructive"}`}
             >
-              Paystack: {mode === "live" ? "LIVE" : mode === "test" ? "TEST MODE" : "NOT CONFIGURED"}
+              Flutterwave: {mode === "live" ? "LIVE" : mode === "test" ? "TEST MODE" : "NOT CONFIGURED"}
             </span>
           </div>
           <div className="flex items-center gap-3 text-sm">

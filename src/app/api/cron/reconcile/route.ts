@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Optional safety net (see vercel.json). Re-verifies recent unsettled
- * checkouts with Paystack — e.g. a payment whose webhook was lost and whose
+ * checkouts with Flutterwave — e.g. a payment whose webhook was lost and whose
  * payer closed the browser — marks lapsed reservations EXPIRED, and purges
  * expired tokens/rate-limit rows. Protected by CRON_SECRET.
  */

@@ -36,14 +36,14 @@ export function Faq({ info }: { info: PublicEventInfo }) {
       a: (
         <>
           Click <strong>Secure your place</strong>, enter your email and pay the registration fee securely through
-          Paystack. Once we&apos;ve verified your payment, you&apos;ll fill in a short registration form. Your place is
+          Flutterwave. Once we&apos;ve verified your payment, you&apos;ll fill in a short registration form. Your place is
           confirmed when the form is submitted and you receive a registration number.
         </>
       ),
     },
     {
       q: "How do I know my payment was successful?",
-      a: "After checkout, our server checks your transaction directly with Paystack. If it was successful, you'll be taken straight to the registration form, and — if email is set up — you'll receive an email too. We never treat a payment as successful just because you were redirected back to our site.",
+      a: "After checkout, our server checks your transaction directly with Flutterwave. If it was successful, you'll be taken straight to the registration form, and — if email is set up — you'll receive an email too. We never treat a payment as successful just because you were redirected back to our site.",
     },
     {
       q: "What if I paid but could not complete the form?",

@@ -37,7 +37,7 @@ export default async function RegistrationFormPage() {
       <FlowShell step={1}>
         <StatusPanel tone="info" title="We haven't confirmed your payment yet">
           <p>
-            The form unlocks as soon as Paystack confirms your payment. <strong>Please don&apos;t pay again.</strong>
+            The form unlocks as soon as Flutterwave confirms your payment. <strong>Please don&apos;t pay again.</strong>
           </p>
           <form action={recheckPaymentAction}>
             <button className={primaryButton}>Check payment status</button>

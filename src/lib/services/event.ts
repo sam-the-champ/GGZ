@@ -1,7 +1,7 @@
 import "server-only";
 import { db, type Tx } from "@/lib/db";
 import { EVENT_SLUG } from "@/content/site";
-import { paystackConfigured } from "@/lib/env";
+import { paymentsConfigured } from "@/lib/env";
 import type { Event } from "@/generated/prisma/client";
 
 export async function getEvent(client: Tx | typeof db = db): Promise<Event | null> {
@@ -130,7 +130,7 @@ export async function getPublicEventInfo(now = new Date()): Promise<PublicEventI
     guardianConsentAge: event.guardianConsentAge,
   };
   // Never show a payment button that cannot work.
-  if (missingSetup(event).length > 0 || !paystackConfigured()) {
+  if (missingSetup(event).length > 0 || !paymentsConfigured()) {
     return { ...base, availability: { state: "not_configured" } };
   }
   if (!event.registrationOpen) return { ...base, availability: { state: "closed" } };

@@ -18,8 +18,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "admin:create": "tsx scripts/create-admin.ts",
-    "paystack:mock": "tsx scripts/mock-paystack.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "payments:mock": "tsx scripts/mock-flutterwave.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

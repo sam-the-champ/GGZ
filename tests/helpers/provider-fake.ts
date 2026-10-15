@@ -1,12 +1,19 @@
-import type { VerifiedTransaction } from "@/lib/paystack/client";
+import type { NormalisedStatus, VerifiedTransaction } from "@/lib/flutterwave/client";
 
 /**
- * In-memory stand-in for Paystack's API, installed with vi.mock in each test
- * file. Tests decide what Paystack "reports" for each reference.
+ * In-memory stand-in for Flutterwave's API, installed with vi.mock in each
+ * test file. Tests decide what the provider "reports" for each reference.
  */
-type Tx = { reference: string; amountKobo: number; currency: string; email: string; attemptId: string; status: string };
+type Tx = {
+  reference: string;
+  amountKobo: number;
+  currency: string;
+  email: string;
+  attemptId: string;
+  status: NormalisedStatus | "not_attempted";
+};
 
-export const fakePaystack = {
+export const fakeProvider = {
   txs: new Map<string, Tx>(),
   initializeCalls: 0,
   verifyCalls: 0,
@@ -18,7 +25,7 @@ export const fakePaystack = {
     this.failInitialize = false;
   },
   /** Simulate the customer finishing checkout with a given outcome. */
-  setStatus(reference: string, status: string, patch: Partial<Tx> = {}) {
+  setStatus(reference: string, status: NormalisedStatus, patch: Partial<Tx> = {}) {
     const tx = this.txs.get(reference);
     if (!tx) throw new Error(`no fake tx ${reference}`);
     Object.assign(tx, { status, ...patch });
@@ -30,27 +37,28 @@ export async function fakeInitialize(input: {
   amountKobo: number;
   currency: string;
   reference: string;
-  metadata: Record<string, string>;
+  meta: Record<string, string>;
 }) {
-  fakePaystack.initializeCalls++;
-  if (fakePaystack.failInitialize) throw new Error("Paystack unavailable");
-  fakePaystack.txs.set(input.reference, {
+  fakeProvider.initializeCalls++;
+  if (fakeProvider.failInitialize) throw new Error("Flutterwave unavailable");
+  fakeProvider.txs.set(input.reference, {
     reference: input.reference,
     amountKobo: input.amountKobo,
     currency: input.currency,
     email: input.email,
-    attemptId: input.metadata.attempt_id!,
-    status: "abandoned",
+    attemptId: input.meta.attempt_id!,
+    status: "not_attempted",
   });
-  return { authorizationUrl: `https://checkout.paystack.test/${input.reference}`, accessCode: `ac_${input.reference}` };
+  return { authorizationUrl: `https://checkout.flutterwave.com/v3/hosted/pay/${input.reference}` };
 }
 
+/** Like Flutterwave: no transaction exists until the customer attempts payment. */
 export async function fakeVerify(reference: string): Promise<VerifiedTransaction | null> {
-  fakePaystack.verifyCalls++;
-  const tx = fakePaystack.txs.get(reference);
-  if (!tx) return null;
+  fakeProvider.verifyCalls++;
+  const tx = fakeProvider.txs.get(reference);
+  if (!tx || tx.status === "not_attempted") return null;
   return {
-    providerId: `trx_${reference}`,
+    providerId: `${100000 + fakeProvider.verifyCalls}`,
     status: tx.status,
     reference: tx.reference,
     amountKobo: tx.amountKobo,

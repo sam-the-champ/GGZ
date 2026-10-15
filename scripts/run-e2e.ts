@@ -1,6 +1,6 @@
 /**
  * npm run test:e2e — builds the app into .next-e2e with test-only settings,
- * then runs Playwright (which starts `next start` and the mock Paystack server).
+ * then runs Playwright (which starts `next start` and the mock Flutterwave server).
  * Pass --skip-build to reuse the previous build.
  */
 import { spawnSync } from "node:child_process";

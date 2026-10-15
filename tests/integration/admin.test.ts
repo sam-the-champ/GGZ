@@ -13,9 +13,9 @@ vi.mock("next/headers", () => ({
   headers: async () => new Headers({ "x-forwarded-for": "203.0.113.9" }),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-vi.mock("@/lib/paystack/client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/paystack/client")>();
-  const fake = await import("../helpers/paystack-fake");
+vi.mock("@/lib/flutterwave/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/flutterwave/client")>();
+  const fake = await import("../helpers/provider-fake");
   return { ...actual, initializeTransaction: fake.fakeInitialize, verifyTransaction: fake.fakeVerify };
 });
 
@@ -28,7 +28,7 @@ import { buildRegistrationsCsv, getDashboardStats, searchAttempts } from "@/lib/
 import { initiateRegistration } from "@/lib/services/attempts";
 import { verifyAndApply } from "@/lib/services/payments";
 import { submitRegistration } from "@/lib/services/registrations";
-import { fakePaystack } from "../helpers/paystack-fake";
+import { fakeProvider } from "../helpers/provider-fake";
 import { resetDb, seedEvent, validForm } from "../helpers/db";
 
 const PASSWORD = "correct horse battery 9";
@@ -64,7 +64,7 @@ async function register(email: string, name: string, phone = "08030000001") {
   const r = await initiateRegistration({ email });
   if (r.kind !== "checkout") throw new Error(r.kind);
   const a = await db.registrationAttempt.findUniqueOrThrow({ where: { id: r.attemptId } });
-  fakePaystack.setStatus(a.paymentReference, "success");
+  fakeProvider.setStatus(a.paymentReference, "success");
   await verifyAndApply(a.paymentReference, "WEBHOOK");
   await submitRegistration(a.id, { ...validForm, fullName: name, phone });
   return a;
@@ -72,7 +72,7 @@ async function register(email: string, name: string, phone = "08030000001") {
 
 beforeEach(async () => {
   await resetDb();
-  fakePaystack.reset();
+  fakeProvider.reset();
   jar.clear();
 });
 
@@ -160,13 +160,13 @@ describe("dashboard, search and export", () => {
     const r = await initiateRegistration({ email: "c@example.com" });
     if (r.kind !== "checkout") throw new Error();
     const c = await db.registrationAttempt.findUniqueOrThrow({ where: { id: r.attemptId } });
-    fakePaystack.setStatus(c.paymentReference, "success");
+    fakeProvider.setStatus(c.paymentReference, "success");
     await verifyAndApply(c.paymentReference, "WEBHOOK");
     // failed
     const f = await initiateRegistration({ email: "d@example.com" });
     if (f.kind !== "checkout") throw new Error();
     const d = await db.registrationAttempt.findUniqueOrThrow({ where: { id: f.attemptId } });
-    fakePaystack.setStatus(d.paymentReference, "failed");
+    fakeProvider.setStatus(d.paymentReference, "failed");
     await verifyAndApply(d.paymentReference, "CALLBACK");
     // pending
     await initiateRegistration({ email: "e@example.com" });

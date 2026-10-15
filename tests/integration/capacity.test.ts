@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/paystack/client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/paystack/client")>();
-  const fake = await import("../helpers/paystack-fake");
+vi.mock("@/lib/flutterwave/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/flutterwave/client")>();
+  const fake = await import("../helpers/provider-fake");
   return { ...actual, initializeTransaction: fake.fakeInitialize, verifyTransaction: fake.fakeVerify };
 });
 
@@ -12,7 +12,7 @@ import { verifyAndApply } from "@/lib/services/payments";
 import { getCapacitySnapshot, getEvent, getPublicEventInfo } from "@/lib/services/event";
 import { allocateOverflowPlace, cancelRegistration, updateSettings } from "@/lib/services/admin";
 import { submitRegistration } from "@/lib/services/registrations";
-import { fakePaystack } from "../helpers/paystack-fake";
+import { fakeProvider } from "../helpers/provider-fake";
 import { resetDb, seedEvent, validForm } from "../helpers/db";
 
 const admin = { id: "", email: "admin@example.com", name: "Admin", role: "ADMIN" as const };
@@ -21,14 +21,14 @@ async function paidAttempt(email: string) {
   const r = await initiateRegistration({ email });
   if (r.kind !== "checkout") throw new Error(r.kind);
   const a = await db.registrationAttempt.findUniqueOrThrow({ where: { id: r.attemptId } });
-  fakePaystack.setStatus(a.paymentReference, "success");
+  fakeProvider.setStatus(a.paymentReference, "success");
   await verifyAndApply(a.paymentReference, "WEBHOOK");
   return a;
 }
 
 beforeEach(async () => {
   await resetDb();
-  fakePaystack.reset();
+  fakeProvider.reset();
   const u = await db.adminUser.create({ data: { email: "admin@example.com", name: "Admin", passwordHash: "x", role: "ADMIN" } });
   admin.id = u.id;
 });
@@ -85,7 +85,7 @@ describe("capacity", () => {
     const late = await db.registrationAttempt.findUniqueOrThrow({ where: { id: r.attemptId } });
     await db.registrationAttempt.update({ where: { id: late.id }, data: { reservationExpiresAt: new Date(Date.now() - 1000) } });
     await paidAttempt("ontime@x.co"); // takes the only place
-    fakePaystack.setStatus(late.paymentReference, "success");
+    fakeProvider.setStatus(late.paymentReference, "success");
     const out = await verifyAndApply(late.paymentReference, "WEBHOOK");
     expect(out.kind === "processed" && out.attempt).toMatchObject({ paymentStatus: "PAID", reservationStatus: "OVERFLOW" });
     const snap = await getCapacitySnapshot(db, (await getEvent())!);

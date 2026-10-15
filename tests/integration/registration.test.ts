@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/paystack/client", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/paystack/client")>();
-  const fake = await import("../helpers/paystack-fake");
+vi.mock("@/lib/flutterwave/client", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/flutterwave/client")>();
+  const fake = await import("../helpers/provider-fake");
   return { ...actual, initializeTransaction: fake.fakeInitialize, verifyTransaction: fake.fakeVerify };
 });
 
@@ -16,7 +16,7 @@ import {
   peekEmailLinkToken,
   resolveSessionToken,
 } from "@/lib/services/continuation";
-import { fakePaystack } from "../helpers/paystack-fake";
+import { fakeProvider } from "../helpers/provider-fake";
 import { resetDb, seedEvent, validForm } from "../helpers/db";
 
 async function checkout(email = "ada@example.com") {
@@ -27,14 +27,14 @@ async function checkout(email = "ada@example.com") {
 
 async function paid(email = "ada@example.com") {
   const c = await checkout(email);
-  fakePaystack.setStatus(c.attempt.paymentReference, "success");
+  fakeProvider.setStatus(c.attempt.paymentReference, "success");
   await verifyAndApply(c.attempt.paymentReference, "CALLBACK");
   return c;
 }
 
 beforeEach(async () => {
   await resetDb();
-  fakePaystack.reset();
+  fakeProvider.reset();
   await seedEvent({ capacity: 10, minimumAge: 13 });
 });
 

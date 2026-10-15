@@ -48,7 +48,7 @@ model Event {
 // ─── Payment-first registration lifecycle ───────────────────────────────────
 
 enum PaymentStatus {
-  INITIATED // attempt created, Paystack transaction not yet created
+  INITIATED // attempt created, provider checkout not yet created
   PENDING // checkout created / provider reports pending or ongoing
   PAID // verified success with matching amount + currency
   FAILED
@@ -69,11 +69,11 @@ model RegistrationAttempt {
   id                   String            @id @default(cuid())
   // Public-safe reference shown to participants (no personal data).
   publicRef            String            @unique
-  // Reference sent to Paystack. Unique and unpredictable.
+  // tx_ref sent to Flutterwave. Unique and unpredictable.
   paymentReference     String            @unique
   eventId              String
   event                Event             @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  // Email used for Paystack checkout and recovery links.
+  // Email used for Flutterwave checkout and recovery links.
   email                String
   // Amount fixed when the attempt was created; later fee changes never alter it.
   amountKobo           Int
@@ -81,8 +81,6 @@ model RegistrationAttempt {
   paymentStatus        PaymentStatus     @default(INITIATED)
   reservationStatus    ReservationStatus @default(ACTIVE)
   reservationExpiresAt DateTime
-  // Paystack access code for resuming the same checkout (avoids double charges).
-  paystackAccessCode   String?
   authorizationUrl     String?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt

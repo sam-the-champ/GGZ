@@ -37,9 +37,9 @@ export default async function TermsPage() {
           <strong>{info.feeKobo != null ? formatNaira(info.feeKobo) : "to be announced"}</strong>.
           {info.feeCovers ? ` It covers: ${info.feeCovers}` : ""}
         </li>
-        <li>Payments are processed securely by Paystack. We never see or store your card details.</li>
+        <li>Payments are processed securely by Flutterwave. We never see or store your card details.</li>
         <li>The amount you pay is fixed when you start checkout, even if the fee changes later.</li>
-        <li>If you paid but could not finish your form, use “Resume registration” — never pay twice. If you believe you were charged twice, contact us and we will investigate with Paystack.</li>
+        <li>If you paid but could not finish your form, use “Resume registration” — never pay twice. If you believe you were charged twice, contact us and we will investigate with Flutterwave.</li>
       </ul>
 
       <h2>Refunds &amp; cancellations</h2>

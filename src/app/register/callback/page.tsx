@@ -12,15 +12,20 @@ import { site } from "@/content/site";
 export const dynamic = "force-dynamic";
 
 /**
- * Paystack redirects here after checkout (or on cancel). Arriving here proves
- * nothing: the reference is verified server-side with Paystack's API, and the
+ * Flutterwave redirects here after checkout (?status=…&tx_ref=…&transaction_id=…),
+ * including when the customer cancels. Arriving here proves nothing: the
+ * reference is verified server-side with Flutterwave's API, and the
  * form only unlocks if this browser's continuation cookie belongs to the
  * same attempt.
  */
 export default async function CallbackPage(props: PageProps<"/register/callback">) {
   const sp = await props.searchParams;
-  const reference = typeof sp.reference === "string" ? sp.reference : typeof sp.trxref === "string" ? sp.trxref : "";
-  const cancelled = sp.cancelled === "1";
+  const reference = typeof sp.tx_ref === "string" ? sp.tx_ref : "";
+  // The redirect status is only a hint. It can release this attempt's own
+  // unpaid hold when Flutterwave has no successful payment; it can never mark
+  // anything as paid.
+  const redirectStatus = typeof sp.status === "string" ? sp.status.toLowerCase() : "";
+  const cancelled = redirectStatus === "cancelled" || redirectStatus === "failed";
 
   if (!/^ggz_[A-Za-z0-9_-]{10,60}$/.test(reference)) {
     return (
@@ -57,7 +62,7 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
       <FlowShell step={1}>
         <StatusPanel tone="warning" title="We're still confirming your payment">
           <p>
-            We couldn&apos;t reach Paystack to confirm your payment just now. <strong>Please don&apos;t pay again.</strong>{" "}
+            We couldn&apos;t reach Flutterwave to confirm your payment just now. <strong>Please don&apos;t pay again.</strong>{" "}
             Try again in a minute.
           </p>
           <form action={recheckPaymentAction}>
@@ -73,7 +78,7 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
       <FlowShell step={1}>
         <StatusPanel tone="error" title="We couldn't find that payment">
           <p>
-            If you were charged, contact {site.contact.name} on {site.contact.phoneDisplay} with your Paystack receipt.
+            If you were charged, contact {site.contact.name} on {site.contact.phoneDisplay} with your Flutterwave receipt.
           </p>
         </StatusPanel>
       </FlowShell>
@@ -124,7 +129,7 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
       <FlowShell step={1}>
         <StatusPanel tone="info" title="Your payment is still processing">
           <p>
-            Paystack hasn&apos;t confirmed your payment yet. This can take a few minutes for bank transfers and USSD.{" "}
+            Flutterwave hasn&apos;t confirmed your payment yet. This can take a few minutes for bank transfers and USSD.{" "}
             <strong>Please don&apos;t pay again.</strong>
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -155,7 +160,7 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
       <StatusPanel tone="error" title={title}>
         {status === "MISMATCH" ? (
           <p>
-            Paystack reported a payment that doesn&apos;t match the expected amount. The organisers have been flagged to
+            Flutterwave reported a payment that doesn&apos;t match the expected amount. The organisers have been flagged to
             review it — please contact {site.contact.name} on {site.contact.phoneDisplay} with reference{" "}
             <strong>{attempt.publicRef}</strong>.
           </p>

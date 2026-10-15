@@ -19,7 +19,7 @@ test("complete registration journey, then visible in the admin dashboard", async
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: /Pay .* securely/ }).click();
 
-  // 4. Mock Paystack checkout (test mode — no real payment)
+  // 4. Mock Flutterwave checkout (test mode — no real payment)
   await expect(page.getByText("TEST MODE")).toBeVisible();
   await page.getByRole("button", { name: "Pay now" }).click();
 

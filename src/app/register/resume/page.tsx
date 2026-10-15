@@ -20,7 +20,7 @@ export default async function ResumePage(props: PageProps<"/register/resume">) {
             <h1 className="font-display text-4xl font-extrabold leading-tight">Resume your registration</h1>
             <p className="mt-3 text-lg text-ink/75">
               Paid but couldn&apos;t finish the form? Enter the email you paid with. We&apos;ll re-check your payment with
-              Paystack and send you a secure link. <strong>You won&apos;t be charged again.</strong>
+              Flutterwave and send you a secure link. <strong>You won&apos;t be charged again.</strong>
             </p>
           </div>
           <Praying className="h-28 w-auto self-start" />

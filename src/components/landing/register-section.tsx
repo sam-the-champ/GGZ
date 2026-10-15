@@ -6,8 +6,8 @@ import { formatNaira } from "@/lib/money";
 import type { PublicEventInfo } from "@/lib/services/event";
 
 const steps = [
-  { title: "Pay the fee", body: "Secure checkout with Paystack — card, bank transfer or USSD." },
-  { title: "We verify", body: "Our server confirms your payment directly with Paystack." },
+  { title: "Pay the fee", body: "Secure checkout with Flutterwave — card, bank transfer or USSD." },
+  { title: "We verify", body: "Our server confirms your payment directly with Flutterwave." },
   { title: "Fill the form", body: "A short form with your details and an emergency contact." },
   { title: "You're in", body: "Get your registration number and confirmation." },
 ];
@@ -72,7 +72,7 @@ export function RegisterSection({ info }: { info: PublicEventInfo }) {
                       <ArrowRight className="size-5 transition group-hover:translate-x-1" aria-hidden="true" />
                     </Link>
                     <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-ink/60">
-                      <Lock className="size-3.5" aria-hidden="true" /> Payments processed securely by Paystack
+                      <Lock className="size-3.5" aria-hidden="true" /> Payments processed securely by Flutterwave
                     </p>
                   </>
                 ) : (

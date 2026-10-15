@@ -1,7 +1,7 @@
 import "server-only";
 import { db, type Tx } from "@/lib/db";
 import { env } from "@/lib/env";
-import { verifyTransaction, type VerifiedTransaction } from "@/lib/paystack/client";
+import { verifyTransaction, type VerifiedTransaction } from "@/lib/flutterwave/client";
 import { getCapacitySnapshot, lockAttempt, lockEvent } from "@/lib/services/event";
 import { issueEmailLinkToken } from "@/lib/services/continuation";
 import { sendEmail } from "@/lib/email/send";
@@ -32,7 +32,7 @@ type Decision = {
 };
 
 /**
- * Validates a Paystack transaction against the attempt it should belong to.
+ * Validates a Flutterwave transaction against the attempt it should belong to.
  * Pure function — easy to unit test.
  */
 export function evaluateTransaction(
@@ -48,10 +48,8 @@ export function evaluateTransaction(
   return { ok: true };
 }
 
-const PENDING_STATES = new Set(["ongoing", "pending", "processing", "queued"]);
-
 /**
- * Verifies a payment reference with Paystack's API and applies the result.
+ * Verifies a payment reference with Flutterwave's API and applies the result.
  *
  * Idempotent: webhooks, browser callbacks, recovery and reconciliation may all
  * call this for the same reference, in any order and any number of times. The
@@ -158,7 +156,7 @@ async function decide(
 
   // "abandoned" without an explicit cancel (checkout may still be open),
   // or a genuinely pending state: keep the reservation until it expires.
-  if (status === "abandoned" || PENDING_STATES.has(status)) {
+  if (status === "abandoned" || status === "pending") {
     return {
       paymentStatus: "PENDING",
       reservationStatus:
@@ -168,7 +166,7 @@ async function decide(
     };
   }
 
-  console.warn(`[payments] ${attempt.paymentReference}: unrecognised Paystack status "${status}"`);
+  console.warn(`[payments] ${attempt.paymentReference}: unrecognised provider status "${status}"`);
   return { paymentStatus: "PENDING", reservationStatus: attempt.reservationStatus };
 }
 

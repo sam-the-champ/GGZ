@@ -3,7 +3,7 @@ import { E2E_PORT, MOCK_PORT, e2eEnv } from "./e2e/env";
 
 /**
  * End-to-end tests against a production build (built by `npm run test:e2e`),
- * a dedicated database (ggz_e2e) and a LOCAL MOCK Paystack server — never
+ * a dedicated database (ggz_e2e) and a LOCAL MOCK Flutterwave server — never
  * real credentials. Requires the local PostgreSQL from `npm run db:local`.
  *
  * Servers are started as plain `node` processes (no npx/shell chains) so they
@@ -21,7 +21,7 @@ export default defineConfig({
   use: { baseURL: e2eEnv.APP_URL, trace: "retain-on-failure", ...devices["Pixel 7"] },
   webServer: [
     {
-      command: "node --import tsx scripts/mock-paystack.ts",
+      command: "node --import tsx scripts/mock-flutterwave.ts",
       url: `http://localhost:${MOCK_PORT}/health`,
       env: e2eEnv,
       reuseExistingServer: false,

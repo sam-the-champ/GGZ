@@ -92,8 +92,8 @@ export function AttemptActions({
         <ActionForm
           action={reverifyAction}
           attemptId={attemptId}
-          label="Re-verify with Paystack"
-          description="Fetches the transaction from Paystack and applies the verified result. It never marks a payment as paid without Paystack confirming it."
+          label="Re-verify with Flutterwave"
+          description="Fetches the transaction from Flutterwave and applies the verified result. It never marks a payment as paid without Flutterwave confirming it."
         />
       )}
       {canRecover && (
@@ -118,7 +118,7 @@ export function AttemptActions({
           attemptId={attemptId}
           label="Cancel registration"
           variant="destructive"
-          description="Cancels the registration and releases the place. Refunds must be processed in the Paystack dashboard."
+          description="Cancels the registration and releases the place. Refunds must be processed in the Flutterwave dashboard."
         >
           <label className="mt-2 block text-sm font-semibold" htmlFor={`reason-${attemptId}`}>Reason</label>
           <input id={`reason-${attemptId}`} name="reason" required minLength={3} maxLength={300} className="mt-1 h-10 w-full rounded-lg border border-input px-3 text-sm" />

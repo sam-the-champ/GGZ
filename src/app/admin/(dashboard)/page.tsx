@@ -3,7 +3,7 @@ import { TriangleAlert } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth/session";
 import { getDashboardStats } from "@/lib/services/admin";
 import { formatNaira } from "@/lib/money";
-import { paystackConfigured } from "@/lib/env";
+import { paymentsConfigured, webhookHashConfigured } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Overview" };
@@ -44,7 +44,7 @@ export default async function AdminOverviewPage() {
     );
   }
   const { capacity: c, event } = stats;
-  const open = event.registrationOpen && stats.missingSetup.length === 0 && paystackConfigured();
+  const open = event.registrationOpen && stats.missingSetup.length === 0 && paymentsConfigured();
 
   return (
     <div className="space-y-8">
@@ -60,7 +60,7 @@ export default async function AdminOverviewPage() {
         </span>
       </div>
 
-      {(stats.missingSetup.length > 0 || !paystackConfigured() || stats.overCommitted || c.overflow > 0 || stats.mismatchedPayments > 0) && (
+      {(stats.missingSetup.length > 0 || !paymentsConfigured() || !webhookHashConfigured() || stats.overCommitted || c.overflow > 0 || stats.mismatchedPayments > 0) && (
         <div className="space-y-2">
           {stats.missingSetup.length > 0 && (
             <Alert>
@@ -68,7 +68,13 @@ export default async function AdminOverviewPage() {
               <Link href="/admin/settings" className="font-semibold underline">Go to settings</Link>
             </Alert>
           )}
-          {!paystackConfigured() && <Alert>PAYSTACK_SECRET_KEY is not configured — payments cannot start.</Alert>}
+          {!paymentsConfigured() && <Alert>FLUTTERWAVE_SECRET_KEY is not configured — payments cannot start.</Alert>}
+          {paymentsConfigured() && !webhookHashConfigured() && (
+            <Alert>
+              FLUTTERWAVE_WEBHOOK_HASH is not set, so Flutterwave webhooks are rejected. Payments still verify when the
+              participant returns to the site, but set the webhook so payers who close their browser are confirmed too.
+            </Alert>
+          )}
           {stats.overCommitted && (
             <Alert>
               Capacity ({c.capacity}) is below current commitments ({c.committed}). New reservations are blocked.
@@ -103,15 +109,15 @@ export default async function AdminOverviewPage() {
       <section aria-labelledby="money">
         <h2 id="money" className="mb-3 font-display text-lg font-bold">Payments</h2>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <Stat label="Gross verified payments" value={formatNaira(stats.grossVerifiedKobo)} hint={`${stats.verifiedPaymentCount} verified with Paystack`} tone="good" href="/admin/payments?status=PAID" />
+          <Stat label="Gross verified payments" value={formatNaira(stats.grossVerifiedKobo)} hint={`${stats.verifiedPaymentCount} verified with Flutterwave`} tone="good" href="/admin/payments?status=PAID" />
           <Stat label="Reversed / refunded" value={formatNaira(stats.reversedKobo)} hint={`${stats.reversedCount} payment(s)`} href="/admin/payments?status=REVERSED" />
           <Stat label="Net verified revenue" value={formatNaira(stats.netKobo)} tone="good" />
           <Stat label="Pending payments" value={stats.pendingPayments} href="/admin/registrations?filter=pending" />
           <Stat label="Failed payments" value={stats.failedPayments} tone="bad" hint={`${stats.abandonedPayments} abandoned`} href="/admin/registrations?filter=failed" />
         </div>
         <p className="mt-3 text-xs text-ink/55">
-          Revenue counts only payments verified server-side with Paystack. Refunds are made in the Paystack dashboard and
-          appear here once Paystack reports the transaction as reversed.
+          Revenue counts only payments verified server-side with Flutterwave. Refunds are made in the Flutterwave dashboard and
+          appear here once Flutterwave reports the transaction as reversed.
         </p>
       </section>
     </div>

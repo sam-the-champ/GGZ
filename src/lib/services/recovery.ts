@@ -10,7 +10,7 @@ import { recoveryEmail } from "@/lib/email/templates";
 /**
  * Recovery for participants who paid but could not finish the form.
  *
- * 1. Re-checks any of this email's unsettled checkouts with Paystack (covers
+ * 1. Re-checks any of this email's unsettled checkouts with Flutterwave (covers
  *    "paid, then closed the browser before the webhook arrived").
  * 2. If a verified, unfinished payment exists, emails a single-use link.
  *

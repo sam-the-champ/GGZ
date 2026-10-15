@@ -22,8 +22,8 @@ export default async function PaymentsPage(props: PageProps<"/admin/payments">) 
       <div>
         <h1 className="font-display text-3xl font-extrabold">Payments</h1>
         <p className="text-ink/65">
-          Provider records verified server-side with Paystack. Statuses cannot be edited by hand — use “Re-verify with
-          Paystack” on a registration to refresh one.
+          Provider records verified server-side with Flutterwave. Statuses cannot be edited by hand — use “Re-verify with
+          Flutterwave” on a registration to refresh one.
         </p>
       </div>
       <nav aria-label="Filter payments" className="flex flex-wrap gap-2">

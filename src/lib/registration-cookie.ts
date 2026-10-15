@@ -7,7 +7,7 @@ const NAME = "ggz_reg";
 
 /**
  * httpOnly continuation cookie. SameSite=Lax so it is sent on the top-level
- * redirect back from Paystack's checkout page.
+ * redirect back from Flutterwave's checkout page.
  */
 export async function setRegistrationCookie(token: string) {
   (await cookies()).set(NAME, token, {

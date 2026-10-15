@@ -1,13 +1,14 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { env, paystackConfigured } from "@/lib/env";
+import { env, paymentsConfigured } from "@/lib/env";
 import { generateToken, randomCode } from "@/lib/crypto";
-import { initializeTransaction, PaystackError } from "@/lib/paystack/client";
+import { initializeTransaction, PaymentProviderError } from "@/lib/flutterwave/client";
 import { getCapacitySnapshot, getEvent, lockEvent, missingSetup } from "@/lib/services/event";
 import { issueEmailLinkToken, issueSessionToken } from "@/lib/services/continuation";
 import { verifyAndApply } from "@/lib/services/payments";
 import { sendEmail } from "@/lib/email/send";
 import { recoveryEmail } from "@/lib/email/templates";
+import { site } from "@/content/site";
 
 export type InitiateResult =
   | { kind: "checkout"; authorizationUrl: string; sessionToken: string; attemptId: string }
@@ -44,7 +45,7 @@ export async function initiateRegistration(input: {
   const email = input.email.trim().toLowerCase();
 
   const event = await getEvent();
-  if (!event || missingSetup(event).length > 0 || !paystackConfigured()) return { kind: "not_configured" };
+  if (!event || missingSetup(event).length > 0 || !paymentsConfigured()) return { kind: "not_configured" };
   if (!event.registrationOpen) return { kind: "closed" };
 
   // 1. Never ask someone to pay twice: a verified, unfinished payment for this
@@ -113,29 +114,27 @@ export async function initiateRegistration(input: {
   if (reserved.kind !== "reserved") return reserved;
   const { attempt, sessionToken } = reserved;
 
-  // 4. Create the Paystack transaction (server-side; amount from the attempt).
+  // 4. Create the Flutterwave checkout (server-side; amount from the attempt).
   const appUrl = env().APP_URL;
   try {
-    const { authorizationUrl, accessCode } = await initializeTransaction({
+    const { authorizationUrl } = await initializeTransaction({
       email,
       amountKobo: attempt.amountKobo,
       currency: attempt.currency,
       reference: attempt.paymentReference,
-      callbackUrl: `${appUrl}/register/callback`,
-      metadata: {
-        attempt_id: attempt.id,
-        public_ref: attempt.publicRef,
-        cancel_action: `${appUrl}/register/callback?reference=${encodeURIComponent(attempt.paymentReference)}&cancelled=1`,
-      },
+      redirectUrl: `${appUrl}/register/callback`,
+      meta: { attempt_id: attempt.id, public_ref: attempt.publicRef },
+      title: `${site.eventName} — ${site.theme}`,
+      description: `Registration fee · ${site.dates.label}`,
     });
     await db.registrationAttempt.update({
       where: { id: attempt.id },
-      data: { paymentStatus: "PENDING", paystackAccessCode: accessCode, authorizationUrl },
+      data: { paymentStatus: "PENDING", authorizationUrl },
     });
     return { kind: "checkout", authorizationUrl, sessionToken, attemptId: attempt.id };
   } catch (err) {
-    console.error("[attempts] Paystack initialize failed", err instanceof PaystackError ? err.message : err);
-    // Release the place immediately; no transaction exists at Paystack.
+    console.error("[attempts] Flutterwave checkout creation failed", err instanceof PaymentProviderError ? err.message : err);
+    // Release the place immediately; no payment exists at Flutterwave.
     await db.registrationAttempt.update({
       where: { id: attempt.id },
       data: { paymentStatus: "FAILED", reservationStatus: "RELEASED" },

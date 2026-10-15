@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         <li>An emergency contact&apos;s name and phone number.</li>
         <li>For participants under the guardian-consent age: a parent or guardian&apos;s name, phone, optional email and their consent.</li>
         <li>Optional information you choose to share about dietary, accessibility or medical needs.</li>
-        <li>Payment records from Paystack: reference, amount, currency, status, payment channel and time. We never receive or store card numbers, CVVs or bank login details — Paystack processes these.</li>
+        <li>Payment records from Flutterwave: reference, amount, currency, status, payment channel and time. We never receive or store card numbers, CVVs or bank login details — Flutterwave processes these.</li>
         <li>Technical data needed for security, such as a hashed form of your IP address for rate limiting.</li>
       </ul>
       <p>We do not ask for your church, denomination or membership.</p>
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
       <h2>Who can access it</h2>
       <p>
         Only authorised members of the GGZ organising team, through a password-protected admin area. Our service
-        providers process data on our behalf: Paystack (payments), our hosting and database providers, and our email
+        providers process data on our behalf: Flutterwave (payments), our hosting and database providers, and our email
         provider (if email is enabled).
       </p>
 

@@ -78,7 +78,7 @@ export default async function RegistrationDetailPage(props: PageProps<"/admin/re
 
           <Panel title="Payment">
             <Field label="Attempt reference" value={a.publicRef} mono />
-            <Field label="Paystack reference" value={a.paymentReference} mono />
+            <Field label="Flutterwave reference" value={a.paymentReference} mono />
             <Field label="Checkout email" value={a.email} />
             <Field label="Expected amount" value={`${formatNaira(a.amountKobo)} ${a.currency}`} />
             <div className="flex flex-wrap gap-2 py-2">

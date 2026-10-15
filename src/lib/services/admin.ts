@@ -337,7 +337,7 @@ export async function reverifyAttempt(admin: AdminIdentity, attemptId: string) {
     entityId: attemptId,
     details: { from: attempt.paymentStatus, result: status },
   });
-  return { ok: true as const, message: `Paystack says: ${status}` };
+  return { ok: true as const, message: `Flutterwave says: ${status}` };
 }
 
 /** Creates a one-time continuation link for organisers to share (e.g. WhatsApp). */
@@ -416,7 +416,7 @@ export async function cancelRegistration(admin: AdminIdentity, attemptId: string
     });
     return {
       ok: true as const,
-      message: "Registration cancelled and place released. Any refund must be processed in Paystack.",
+      message: "Registration cancelled and place released. Any refund must be processed in the Flutterwave dashboard.",
     };
   });
 }

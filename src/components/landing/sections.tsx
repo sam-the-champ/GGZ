@@ -276,7 +276,7 @@ export function CampDetails() {
           <div className="rounded-3xl bg-white p-7 ring-1 ring-ink/5 sm:p-9">
             <h3 className="font-display text-2xl font-bold">Before you register</h3>
             <ul className="mt-5 grid gap-4 text-ink/80 sm:grid-cols-2">
-              <li className="flex gap-3"><Check /><span>Registration happens in two steps: pay the registration fee securely through Paystack, then complete a short registration form.</span></li>
+              <li className="flex gap-3"><Check /><span>Registration happens in two steps: pay the registration fee securely through Flutterwave, then complete a short registration form.</span></li>
               <li className="flex gap-3"><Check /><span>Your place is only confirmed once your payment is verified <em>and</em> your form is submitted.</span></li>
               <li className="flex gap-3"><Check /><span>Have your phone number, date of birth and an emergency contact ready.</span></li>
               <li className="flex gap-3"><Check /><span>Under-18s will need a parent or guardian&apos;s details and consent.</span></li>

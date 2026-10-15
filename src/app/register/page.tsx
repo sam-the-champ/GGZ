@@ -3,7 +3,7 @@ import { FlowShell, Card } from "@/components/register/flow-shell";
 import { StartForm } from "@/components/register/start-form";
 import { BibleReader } from "@/components/illustrations/characters";
 import { getPublicEventInfo } from "@/lib/services/event";
-import { paystackConfigured } from "@/lib/env";
+import { paymentsConfigured } from "@/lib/env";
 import { formatNaira } from "@/lib/money";
 import { site } from "@/content/site";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function RegisterPage() {
   const info = await getPublicEventInfo();
   const a = info.availability;
-  const open = a.state === "open" && paystackConfigured() ? a : null;
+  const open = a.state === "open" && paymentsConfigured() ? a : null;
 
   return (
     <FlowShell step={0}>
@@ -39,10 +39,10 @@ export default async function RegisterPage() {
             </div>
             <ol className="mt-6 space-y-2 text-ink/80">
               <li>
-                <strong>1.</strong> Enter your email and pay securely with Paystack.
+                <strong>1.</strong> Enter your email and pay securely with Flutterwave.
               </li>
               <li>
-                <strong>2.</strong> We verify your payment directly with Paystack.
+                <strong>2.</strong> We verify your payment directly with Flutterwave.
               </li>
               <li>
                 <strong>3.</strong> Complete the short registration form to confirm your place.

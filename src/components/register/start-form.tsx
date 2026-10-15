@@ -33,7 +33,7 @@ export function StartForm({ feeLabel }: { feeLabel: string }) {
           Email address
         </label>
         <p id="email-hint" className="text-sm text-ink/65">
-          Used for your Paystack receipt and to send your secure registration link.
+          Used for your Flutterwave receipt and to send your secure registration link.
         </p>
         <input
           id="email"
@@ -77,7 +77,7 @@ export function StartForm({ feeLabel }: { feeLabel: string }) {
 
       <SubmitButton label={`Pay ${feeLabel} securely`} />
       <p className="flex items-center gap-1.5 text-xs text-ink/60">
-        <Lock className="size-3.5 shrink-0" aria-hidden="true" /> You&apos;ll be taken to Paystack&apos;s secure
+        <Lock className="size-3.5 shrink-0" aria-hidden="true" /> You&apos;ll be taken to Flutterwave&apos;s secure
         checkout. We never see or store your card details.
       </p>
     </form>

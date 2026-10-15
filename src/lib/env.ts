@@ -8,8 +8,10 @@ const schema = z.object({
     .url()
     .transform((v) => v.replace(/\/+$/, "")),
   APP_SECRET: z.string().min(32, "APP_SECRET must be at least 32 characters"),
-  PAYSTACK_SECRET_KEY: z.string().optional(),
-  PAYSTACK_API_BASE_URL: z.string().url().optional(),
+  FLUTTERWAVE_SECRET_KEY: z.string().optional(),
+  // The "Secret hash" set in Flutterwave → Settings → Webhooks.
+  FLUTTERWAVE_WEBHOOK_HASH: z.string().optional(),
+  FLUTTERWAVE_API_BASE_URL: z.string().url().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().optional(),
   CRON_SECRET: z.string().optional(),
@@ -43,20 +45,24 @@ export function isSecureContext() {
   return env().APP_URL.startsWith("https://");
 }
 
-/** The placeholder shipped in .env.example — never a usable key. */
-export const PLACEHOLDER_PAYSTACK_KEY = "sk_test_replace_me";
+/** Placeholders shipped in .env.example — never usable values. */
+export const PLACEHOLDER_SECRET_KEY = "FLWSECK_TEST-replace-me";
+export const PLACEHOLDER_WEBHOOK_HASH = "replace-with-your-webhook-secret-hash";
 
-export function paystackConfigured() {
-  const key = env().PAYSTACK_SECRET_KEY;
-  return Boolean(key && /^sk_(test|live)_/.test(key) && key !== PLACEHOLDER_PAYSTACK_KEY);
+/** Flutterwave secret keys: FLWSECK_TEST-… (test mode) or FLWSECK-… (live). */
+export function paymentsConfigured() {
+  const key = env().FLUTTERWAVE_SECRET_KEY;
+  return Boolean(key && /^FLWSECK(_TEST)?-/.test(key) && key !== PLACEHOLDER_SECRET_KEY);
 }
 
-export function paystackMode(): "test" | "live" | "unconfigured" {
-  if (!paystackConfigured()) return "unconfigured";
-  const key = env().PAYSTACK_SECRET_KEY ?? "";
-  if (key.startsWith("sk_live_")) return "live";
-  if (key.startsWith("sk_test_")) return "test";
-  return "unconfigured";
+export function paymentsMode(): "test" | "live" | "unconfigured" {
+  if (!paymentsConfigured()) return "unconfigured";
+  return env().FLUTTERWAVE_SECRET_KEY!.startsWith("FLWSECK_TEST-") ? "test" : "live";
+}
+
+export function webhookHashConfigured() {
+  const hash = env().FLUTTERWAVE_WEBHOOK_HASH;
+  return Boolean(hash && hash.length >= 16 && hash !== PLACEHOLDER_WEBHOOK_HASH);
 }
 
 export function emailConfigured() {
