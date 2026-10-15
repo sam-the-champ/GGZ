@@ -10,6 +10,7 @@ const items = [
   { href: "/admin/payments", label: "Payments" },
   { href: "/admin/settings", label: "Event settings" },
   { href: "/admin/audit", label: "Audit log" },
+  { href: "/admin/account", label: "My account" },
 ];
 
 export function AdminNav() {

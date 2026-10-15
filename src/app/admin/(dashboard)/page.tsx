@@ -3,7 +3,7 @@ import { TriangleAlert } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth/session";
 import { getDashboardStats } from "@/lib/services/admin";
 import { formatNaira } from "@/lib/money";
-import { paymentsConfigured, webhookHashConfigured } from "@/lib/env";
+import { emailConfigured, paymentsConfigured, webhookHashConfigured } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Overview" };
@@ -60,7 +60,7 @@ export default async function AdminOverviewPage() {
         </span>
       </div>
 
-      {(stats.missingSetup.length > 0 || !paymentsConfigured() || !webhookHashConfigured() || stats.overCommitted || c.overflow > 0 || stats.mismatchedPayments > 0) && (
+      {(stats.missingSetup.length > 0 || !paymentsConfigured() || !webhookHashConfigured() || !emailConfigured() || stats.overCommitted || c.overflow > 0 || stats.mismatchedPayments > 0) && (
         <div className="space-y-2">
           {stats.missingSetup.length > 0 && (
             <Alert>
@@ -73,6 +73,12 @@ export default async function AdminOverviewPage() {
             <Alert>
               FLUTTERWAVE_WEBHOOK_HASH is not set, so Flutterwave webhooks are rejected. Payments still verify when the
               participant returns to the site, but set the webhook so payers who close their browser are confirmed too.
+            </Alert>
+          )}
+          {!emailConfigured() && (
+            <Alert>
+              Email isn&apos;t connected, so participants get no confirmation or recovery emails.{" "}
+              <Link href="/admin/settings" className="font-semibold underline">How to connect it</Link>
             </Alert>
           )}
           {stats.overCommitted && (

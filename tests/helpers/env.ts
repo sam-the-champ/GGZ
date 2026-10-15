@@ -7,3 +7,4 @@ process.env.FLUTTERWAVE_WEBHOOK_HASH = "unit-test-webhook-secret-hash";
 delete process.env.RESEND_API_KEY;
 delete process.env.EMAIL_FROM;
 delete process.env.FLUTTERWAVE_API_BASE_URL;
+process.env.CRON_SECRET = "unit-test-cron-secret-0123456789";

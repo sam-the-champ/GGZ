@@ -75,3 +75,17 @@ export function confirmationEmail(input: {
     text: `Hi ${input.fullName},\n\nYour place at ${site.eventName} — ${site.theme} is confirmed.\nRegistration no.: ${input.registrationNumber}\nDates: ${site.dates.label}\nVenue: ${site.venueLabel}\n\nNeed help? ${site.contact.name}: ${site.contact.phoneDisplay}`,
   };
 }
+
+export function testEmail(to: string): EmailMessage {
+  const title = "Email is working";
+  return {
+    to,
+    subject: `${site.eventName}: test email`,
+    html: layout(
+      title,
+      `<p>This is a test from the ${escapeHtml(site.eventName)} admin dashboard.</p>
+<p>If you can read this, participants will receive their confirmation emails and secure registration links.</p>`,
+    ),
+    text: `This is a test from the ${site.eventName} admin dashboard. Email delivery is working.`,
+  };
+}

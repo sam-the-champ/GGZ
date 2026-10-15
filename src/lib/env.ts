@@ -12,7 +12,18 @@ const schema = z.object({
   // The "Secret hash" set in Flutterwave → Settings → Webhooks.
   FLUTTERWAVE_WEBHOOK_HASH: z.string().optional(),
   FLUTTERWAVE_API_BASE_URL: z.string().url().optional(),
+  // Email option A: any mailbox over SMTP (e.g. Gmail + App Password).
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_USER: z.string().optional(),
+  // Gmail shows App Passwords with spaces ("abcd efgh ijkl mnop"); they're not part of it.
+  SMTP_PASS: z
+    .string()
+    .optional()
+    .transform((v) => v?.replace(/\s+/g, "")),
+  // Email option B: Resend (needs a verified domain).
   RESEND_API_KEY: z.string().optional(),
+  // e.g. "GGZ Camp <ggz@gmail.com>". Defaults to the SMTP account.
   EMAIL_FROM: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -95,7 +106,14 @@ export function webhookHashConfigured() {
   return Boolean(hash && hash.length >= 16 && hash !== PLACEHOLDER_WEBHOOK_HASH);
 }
 
-export function emailConfigured() {
+/** Which email provider is configured, preferring SMTP. */
+export function emailProvider(): "smtp" | "resend" | null {
   const e = env();
-  return Boolean(e.RESEND_API_KEY && e.EMAIL_FROM);
+  if (e.SMTP_HOST && e.SMTP_USER && e.SMTP_PASS) return "smtp";
+  if (e.RESEND_API_KEY && e.EMAIL_FROM) return "resend";
+  return null;
+}
+
+export function emailConfigured() {
+  return emailProvider() !== null;
 }

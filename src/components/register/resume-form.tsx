@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { LoaderCircle } from "lucide-react";
@@ -21,15 +22,28 @@ export function ResumeForm() {
   const [state, action] = useActionState<ResumeState, FormData>(requestRecoveryAction, {});
   if (state.done) {
     return (
-      <div role="status" className="mt-8 rounded-2xl bg-palm/10 p-5">
-        <p className="font-display text-xl font-bold">Check your inbox</p>
-        <p className="mt-2 text-ink/80">
-          {state.emailEnabled
-            ? "If we found a verified payment for that email, we've sent a secure link to finish your registration. It works once and expires in 2 hours. Check your spam folder too."
-            : `If we found a verified payment for that email, the organisers can send you a secure link. Please contact ${site.contact.name} on ${site.contact.phoneDisplay}.`}
+      <div role="status" className="mt-8 space-y-4 rounded-2xl bg-palm/10 p-5">
+        <p className="font-display text-xl font-bold">
+          {state.emailEnabled ? "Check your inbox" : "Request received"}
         </p>
-        <p className="mt-3 text-sm text-ink/65">
-          Didn&apos;t get anything after a few minutes? Contact {site.contact.name} on {site.contact.phoneDisplay}.
+        <ul className="space-y-3 text-ink/80">
+          <li>
+            <strong>If you paid</strong> with that email:{" "}
+            {state.emailEnabled
+              ? "we've emailed you a secure link to finish your registration. It works once and expires in 2 hours — check your spam folder too."
+              : `please contact ${site.contact.name} on ${site.contact.phoneDisplay}. The organisers can see your payment and will send you a secure link to finish.`}
+          </li>
+          <li>
+            <strong>If you didn&apos;t complete a payment</strong>, there&apos;s nothing to resume and no email will be
+            sent. Simply{" "}
+            <Link href="/register" className="font-semibold underline underline-offset-2">
+              start your registration
+            </Link>{" "}
+            again — you haven&apos;t been charged.
+          </li>
+        </ul>
+        <p className="text-sm text-ink/65">
+          Still stuck? Contact {site.contact.name} on {site.contact.phoneDisplay}.
         </p>
       </div>
     );

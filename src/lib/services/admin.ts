@@ -7,6 +7,9 @@ import { issueEmailLinkToken } from "@/lib/services/continuation";
 import { verifyAndApply } from "@/lib/services/payments";
 import { audit } from "@/lib/services/audit";
 import { nairaInputToKobo } from "@/lib/money";
+import { sendEmail } from "@/lib/email/send";
+import { confirmationEmail } from "@/lib/email/templates";
+import { participantEditSchema } from "@/lib/validation/registration";
 import type { AdminIdentity } from "@/lib/auth/session";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -458,4 +461,83 @@ export async function eraseParticipant(admin: AdminIdentity, attemptId: string) 
     });
   });
   return { ok: true as const, message: "Personal data erased." };
+}
+
+// ─── Participant corrections & confirmation resend ──────────────────────────
+
+/**
+ * Lets organisers correct typos in a participant's details. Date of birth,
+ * email and consent records are deliberately not editable here. The audit log
+ * records which fields changed — not their values (personal data).
+ */
+export async function updateParticipant(admin: AdminIdentity, attemptId: string, input: unknown) {
+  const parsed = participantEditSchema.safeParse(input);
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const i of parsed.error.issues) errors[String(i.path[0])] ??= i.message;
+    return { ok: false as const, message: "Please fix the highlighted fields.", errors };
+  }
+  const attempt = await db.registrationAttempt.findUnique({
+    where: { id: attemptId },
+    include: { registration: { include: { participant: true } } },
+  });
+  const participant = attempt?.registration?.participant;
+  if (!participant || participant.erasedAt) return { ok: false as const, message: "No participant record to edit." };
+
+  const d = parsed.data;
+  const next = {
+    fullName: d.fullName,
+    phone: d.phone,
+    cityOrState: d.cityOrState,
+    emergencyContactName: d.emergencyContactName,
+    emergencyContactPhone: d.emergencyContactPhone,
+    supportNeeds: d.supportNeeds ?? null,
+    guardianName: participant.guardianName != null ? (d.guardianName ?? null) : participant.guardianName,
+    guardianPhone: participant.guardianName != null ? (d.guardianPhone ?? null) : participant.guardianPhone,
+    guardianEmail: participant.guardianName != null ? (d.guardianEmail ?? null) : participant.guardianEmail,
+  };
+  const changed = (Object.keys(next) as (keyof typeof next)[]).filter((k) => participant[k] !== next[k]);
+  if (changed.length === 0) return { ok: true as const, message: "Nothing changed." };
+
+  await db.$transaction(async (tx) => {
+    await tx.participant.update({ where: { id: participant.id }, data: next });
+    await audit(tx, {
+      actorId: admin.id,
+      action: "participant.update",
+      entityType: "Registration",
+      entityId: attempt!.registration!.id,
+      details: { fields: changed },
+    });
+  });
+  return { ok: true as const, message: `Saved (${changed.length} field${changed.length === 1 ? "" : "s"} updated).` };
+}
+
+export async function resendConfirmation(admin: AdminIdentity, attemptId: string) {
+  const registration = await db.registration.findUnique({
+    where: { attemptId },
+    include: { participant: true },
+  });
+  if (!registration || registration.status !== "CONFIRMED" || registration.participant.erasedAt) {
+    return { ok: false as const, message: "Only confirmed registrations can be re-sent." };
+  }
+  const result = await sendEmail(
+    confirmationEmail({
+      to: registration.participant.email,
+      fullName: registration.participant.fullName,
+      registrationNumber: registration.registrationNumber,
+    }),
+  );
+  if (result.sent) {
+    await db.registration.update({ where: { id: registration.id }, data: { confirmationEmailSentAt: new Date() } });
+  }
+  await audit(db, {
+    actorId: admin.id,
+    action: "registration.confirmation_resent",
+    entityType: "Registration",
+    entityId: registration.id,
+    details: { sent: result.sent },
+  });
+  return result.sent
+    ? { ok: true as const, message: `Confirmation sent to ${registration.participant.email}.` }
+    : { ok: false as const, message: `Not sent: ${result.error ?? "email is not configured"}` };
 }

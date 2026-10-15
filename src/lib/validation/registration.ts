@@ -101,3 +101,17 @@ export function agePolicyErrors(
   }
   return errors;
 }
+
+/** Fields organisers may correct after submission (identity/consent fields excluded). */
+export const participantEditSchema = registrationFormSchema.pick({
+  fullName: true,
+  phone: true,
+  cityOrState: true,
+  emergencyContactName: true,
+  emergencyContactPhone: true,
+  supportNeeds: true,
+  guardianName: true,
+  guardianPhone: true,
+  guardianEmail: true,
+});
+export type ParticipantEdit = z.output<typeof participantEditSchema>;

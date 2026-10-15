@@ -34,3 +34,23 @@ describe("environment normalisation", () => {
     expect(problems.join(" ")).not.toContain("short-secret-value");
   });
 });
+
+describe("email provider", () => {
+  it("prefers SMTP, falls back to Resend, and strips App Password spaces", async () => {
+    const { emailProvider, env, resetEnvCache } = await import("@/lib/env");
+    const saved = { ...process.env };
+    Object.assign(process.env, { SMTP_HOST: "smtp.gmail.com", SMTP_USER: "ggz@gmail.com", SMTP_PASS: "abcd efgh ijkl mnop" });
+    resetEnvCache();
+    expect(emailProvider()).toBe("smtp");
+    expect(env().SMTP_PASS).toBe("abcdefghijklmnop");
+    delete process.env.SMTP_PASS;
+    Object.assign(process.env, { RESEND_API_KEY: "re_x", EMAIL_FROM: "GGZ <camp@example.org>" });
+    resetEnvCache();
+    expect(emailProvider()).toBe("resend");
+    for (const k of ["SMTP_HOST", "SMTP_USER", "RESEND_API_KEY", "EMAIL_FROM"]) delete process.env[k];
+    resetEnvCache();
+    expect(emailProvider()).toBeNull();
+    Object.assign(process.env, saved);
+    resetEnvCache();
+  });
+});

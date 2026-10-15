@@ -5,6 +5,7 @@ import { hasRole, requireAdminPage } from "@/lib/auth/session";
 import { getAttemptDetail } from "@/lib/services/admin";
 import { StatusBadge, overallStatus } from "@/components/admin/status-badge";
 import { AttemptActions } from "@/components/admin/attempt-actions";
+import { ParticipantEditForm, ResendConfirmationButton } from "@/components/admin/participant-edit-form";
 import { formatNaira } from "@/lib/money";
 import { db } from "@/lib/db";
 
@@ -105,14 +106,34 @@ export default async function RegistrationDetailPage(props: PageProps<"/admin/re
         <div className="space-y-6">
           <Panel title="Actions">
             {isAdmin ? (
-              <AttemptActions
-                attemptId={a.id}
-                canReverify={!["PAID", "MISMATCH", "REVERSED"].includes(a.paymentStatus)}
-                canRecover={a.paymentStatus === "PAID" && a.reservationStatus === "HELD" && !r}
-                canAllocate={a.paymentStatus === "PAID" && a.reservationStatus === "OVERFLOW"}
-                canCancel={r?.status === "CONFIRMED"}
-                canErase={Boolean(r && !p?.erasedAt)}
-              />
+              <div className="grid gap-3">
+                {p && !p.erasedAt && (
+                  <ParticipantEditForm
+                    attemptId={a.id}
+                    hasGuardian={p.guardianName != null}
+                    values={{
+                      fullName: p.fullName,
+                      phone: p.phone,
+                      cityOrState: p.cityOrState,
+                      emergencyContactName: p.emergencyContactName,
+                      emergencyContactPhone: p.emergencyContactPhone,
+                      supportNeeds: p.supportNeeds ?? "",
+                      guardianName: p.guardianName ?? "",
+                      guardianPhone: p.guardianPhone ?? "",
+                      guardianEmail: p.guardianEmail ?? "",
+                    }}
+                  />
+                )}
+                {r?.status === "CONFIRMED" && !p?.erasedAt && <ResendConfirmationButton attemptId={a.id} />}
+                <AttemptActions
+                  attemptId={a.id}
+                  canReverify={!["PAID", "MISMATCH", "REVERSED"].includes(a.paymentStatus)}
+                  canRecover={a.paymentStatus === "PAID" && a.reservationStatus === "HELD" && !r}
+                  canAllocate={a.paymentStatus === "PAID" && a.reservationStatus === "OVERFLOW"}
+                  canCancel={r?.status === "CONFIRMED"}
+                  canErase={Boolean(r && !p?.erasedAt)}
+                />
+              </div>
             ) : (
               <p className="text-sm text-ink/60">Viewer accounts are read-only.</p>
             )}

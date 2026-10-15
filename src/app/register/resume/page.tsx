@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FlowShell, Card } from "@/components/register/flow-shell";
 import { ResumeForm } from "@/components/register/resume-form";
 import { Praying } from "@/components/illustrations/characters";
@@ -21,6 +22,13 @@ export default async function ResumePage(props: PageProps<"/register/resume">) {
             <p className="mt-3 text-lg text-ink/75">
               Paid but couldn&apos;t finish the form? Enter the email you paid with. We&apos;ll re-check your payment with
               Flutterwave and send you a secure link. <strong>You won&apos;t be charged again.</strong>
+            </p>
+            <p className="mt-3 text-sm text-ink/65">
+              Haven&apos;t paid yet? This page isn&apos;t for you —{" "}
+              <Link href="/register" className="font-semibold underline underline-offset-2">
+                start your registration here
+              </Link>
+              .
             </p>
           </div>
           <Praying className="h-28 w-auto self-start" />

@@ -2,6 +2,9 @@ import { hasRole, requireAdminPage } from "@/lib/auth/session";
 import { getEvent } from "@/lib/services/event";
 import { SettingsForm } from "@/components/admin/settings-form";
 import { koboToNairaInput } from "@/lib/money";
+import { EmailPanel } from "@/components/admin/email-panel";
+import { emailProvider } from "@/lib/env";
+import { senderAddress } from "@/lib/email/send";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Event settings" };
@@ -24,6 +27,11 @@ export default async function SettingsPage() {
           <div><dt className="text-ink/60">Venue</dt><dd className="font-semibold">{event.venue}</dd></div>
         </dl>
       </section>
+      <EmailPanel
+        provider={emailProvider()}
+        sender={emailProvider() ? senderAddress() : null}
+        canTest={hasRole(admin, "ADMIN")}
+      />
       <SettingsForm
         readOnly={!hasRole(admin, "ADMIN")}
         initial={{

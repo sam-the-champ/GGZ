@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { safeEqualHex, sha256 } from "@/lib/crypto";
 import { verifyAndApply } from "@/lib/services/payments";
+import type { Prisma } from "@/generated/prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -49,5 +50,25 @@ export async function GET(request: NextRequest) {
     db.adminSession.deleteMany({ where: { expiresAt: { lt: now } } }),
   ]);
 
-  return NextResponse.json({ verified, expiredReservations: expired.count });
+  // Data retention (docs/DATA-RETENTION.md): unpaid checkouts are deleted
+  // after 90 days. Paid attempts, payments and registrations are never touched.
+  const cutoff = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+  const stale: Prisma.RegistrationAttemptWhereInput = {
+    createdAt: { lt: cutoff },
+    paymentStatus: { in: ["INITIATED", "PENDING", "FAILED", "ABANDONED"] },
+    registration: { is: null },
+  };
+  const purged = await db.$transaction(async (tx) => {
+    const ids = (await tx.registrationAttempt.findMany({ where: stale, select: { id: true }, take: 500 })).map(
+      (a) => a.id,
+    );
+    if (ids.length === 0) return 0;
+    await tx.payment.deleteMany({ where: { attemptId: { in: ids }, status: { not: "PAID" } } });
+    const res = await tx.registrationAttempt.deleteMany({
+      where: { id: { in: ids }, payment: { is: null } },
+    });
+    return res.count;
+  });
+
+  return NextResponse.json({ verified, expiredReservations: expired.count, purgedUnpaidAttempts: purged });
 }

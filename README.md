@@ -81,7 +81,8 @@ See `.env.example` for the full annotated list.
 | `APP_SECRET` | yes | 32+ random characters. Used to HMAC IP addresses and emails for rate limiting. |
 | `FLUTTERWAVE_SECRET_KEY` | yes, for payments | `FLWSECK_TEST-…` in development, `FLWSECK-…` in production. Server-only — **never** give it a `NEXT_PUBLIC_` prefix. No public key is needed, because checkout uses Flutterwave's hosted page. |
 | `FLUTTERWAVE_WEBHOOK_HASH` | yes, for webhooks | The secret hash you set in Flutterwave → Settings → Webhooks. Webhooks are rejected without it. |
-| `RESEND_API_KEY`, `EMAIL_FROM` | recommended | Confirmation emails and email recovery links. If they're missing, the site still works: participants are told to contact organisers, and admins can issue links. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` | recommended | Email through any mailbox (e.g. Gmail with an App Password); no domain needed. See [Email setup](#email-setup). |
+| `RESEND_API_KEY`, `EMAIL_FROM` | alternative | Email through Resend; needs a verified domain. Used only if SMTP isn't set. |
 | `CRON_SECRET` | optional | Protects `/api/cron/reconcile`. |
 | `FLUTTERWAVE_API_BASE_URL` | tests only | Points the app at the mock Flutterwave server. It is ignored unless the key starts with `FLWSECK_TEST-`. |
 
@@ -143,12 +144,27 @@ Cancelled or failed payments release the place straight away. Unpaid reservation
 - if a place is still free, they keep it;
 - otherwise the attempt is marked **OVERFLOW** ("Paid · needs place") for organisers to give them a place or refund them.
 
+## Email setup
+
+The site sends three emails: **payment received** (with a secure link to finish the form), **registration confirmed** (with the registration number), and **recovery links** from the Resume page. Recovery links are only sent to emails that have a completed payment.
+
+**Gmail (no domain needed):**
+1. In the Google account you'll send from, turn on **2-Step Verification** (Google Account → Security).
+2. Open <https://myaccount.google.com/apppasswords>, create an App Password named "GGZ Camp", and copy the 16-letter code.
+3. In Vercel → Environment Variables (Production), add:
+   `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=<the gmail address>`, `SMTP_PASS=<the 16-letter code>`, `EMAIL_FROM=GGZ Camp <the gmail address>`. Then redeploy.
+4. In the admin, open **Event settings → Email → Send me a test email**. If it fails, the exact error is shown.
+
+To use your own domain later (better deliverability), switch to Resend: verify the domain in Resend, set `RESEND_API_KEY` and `EMAIL_FROM`, and remove the `SMTP_*` variables.
+
 ## Admin users
 
 - There is no public sign-up. Create accounts with `npm run admin:create -- --email … --name … --role ADMIN|VIEWER`.
 - To choose the password yourself, set `ADMIN_PASSWORD`. Otherwise a strong one is generated and printed **once**. Re-running the command for the same email resets the password and signs that user out everywhere.
 - Roles: **ADMIN** can do everything (settings, cancellations, recovery links, erasure). **VIEWER** can only read and export.
 - Nothing is seeded with a default password.
+- Any admin can change their own password under **My account** (other devices are signed out).
+- On a registration's page, admins can **edit details** (fixes typos; email, date of birth and consent stay locked; changes are audited by field name), **resend the confirmation email**, create a recovery link, cancel, or erase personal data.
 
 ## Configuring the event (fee & capacity)
 
@@ -225,7 +241,7 @@ Automated tests never use real Flutterwave credentials.
   - logistics.
 
   `/privacy` and `/terms` are **drafts for organiser review**, ideally checked against the Nigeria Data Protection Act 2023.
-- **Email delivery** needs a Resend account and a verified sending domain. Without it, recovery relies on the organisers issuing links.
+- **Email delivery** must be connected (see [Email setup](#email-setup)). Without it, recovery relies on the organisers issuing links. A Gmail mailbox can send roughly 500 emails a day, which is plenty for this event.
 - **Refunds** are done in the Flutterwave dashboard. Admins can cancel a registration to release the place; payment records keep the verified amounts.
 - **Rate limiting** uses fixed windows in PostgreSQL. That is fine at this scale; a very large launch could add Vercel WAF rules.
 - `prisma init` added Prisma's agent skill files under `.claude/`, `.agents/` and `.windsurf/`. They are git-ignored; delete them if you don't want them.
