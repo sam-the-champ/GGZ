@@ -154,3 +154,61 @@ ${button(input.adminUrl, "Open in Help Desk")}
     text: `New help request ${input.reference} from ${input.name}: ${input.categoryLabel}\n${input.adminUrl}`,
   };
 }
+
+// ─── Resume-page outcomes (sent to the inbox owner, never shown on screen) ──
+
+export function alreadyRegisteredEmail(input: {
+  to: string;
+  fullName: string;
+  registrationNumber: string;
+  helpUrl: string;
+}): EmailMessage {
+  const title = "You're already registered";
+  return {
+    to: input.to,
+    subject: `${site.eventName}: you're already registered (${input.registrationNumber})`,
+    html: layout(
+      title,
+      `<p>Hi ${escapeHtml(input.fullName)},</p>
+<p>Someone (hopefully you) asked to resume a registration for this email address. Good news — your registration is already <strong>complete</strong>. There's nothing more to fill in and you don't need to pay again.</p>
+<table style="font-size:15px;margin:16px 0;border-collapse:collapse">
+<tr><td style="padding:4px 16px 4px 0;color:#5b6773">Registration no.</td><td style="font-weight:bold">${escapeHtml(input.registrationNumber)}</td></tr>
+<tr><td style="padding:4px 16px 4px 0;color:#5b6773">Dates</td><td>${escapeHtml(site.dates.label)}</td></tr>
+<tr><td style="padding:4px 16px 4px 0;color:#5b6773">Venue</td><td>${escapeHtml(site.venueLabel)}</td></tr>
+</table>
+<p style="font-size:13px;color:#5b6773">Something wrong with your details? ${button(input.helpUrl, "Visit the Help Center")}</p>`,
+    ),
+    text: `Hi ${input.fullName},\n\nYour registration for ${site.eventName} is already complete. Registration no.: ${input.registrationNumber}. You don't need to pay again.\n\nNeed help? ${input.helpUrl}`,
+  };
+}
+
+export function noPaymentFoundEmail(input: { to: string; registerUrl: string; helpUrl: string }): EmailMessage {
+  const title = "We couldn't find a completed payment";
+  return {
+    to: input.to,
+    subject: `${site.eventName}: about your registration request`,
+    html: layout(
+      title,
+      `<p>Someone (hopefully you) asked to resume a registration for this email address, but we couldn't find a <strong>completed payment</strong> for it.</p>
+<p>If you started registering but didn't finish paying, you haven't been charged — just start again:</p>
+${button(input.registerUrl, "Start registration")}
+<p>If money left your account, please <a href="${escapeHtml(input.helpUrl)}">send a request in the Help Center</a> with the date and amount, or check whether you paid with a different email address.</p>
+<p style="font-size:13px;color:#5b6773">If you didn't request this, you can ignore this email.</p>`,
+    ),
+    text: `We couldn't find a completed payment for this email address.\n\nIf you didn't finish paying, you haven't been charged — start again: ${input.registerUrl}\n\nIf money left your account, send a request: ${input.helpUrl}\n\nIf you didn't request this, ignore this email.`,
+  };
+}
+
+export function paymentOnHoldEmail(input: { to: string; publicRef: string; helpUrl: string }): EmailMessage {
+  const title = "Your payment is safe — the organisers will be in touch";
+  return {
+    to: input.to,
+    subject: `${site.eventName}: your payment (${input.publicRef})`,
+    html: layout(
+      title,
+      `<p>We found your payment (reference <strong>${escapeHtml(input.publicRef)}</strong>). It arrived after your reserved place had expired and the camp was full at that moment, so the organisers need to review it.</p>
+<p>You don't need to pay again. The team will contact you about a place or a refund. You can also <a href="${escapeHtml(input.helpUrl)}">send a request in the Help Center</a>.</p>`,
+    ),
+    text: `We found your payment (${input.publicRef}). It arrived after your reserved place expired while camp was full, so the organisers will contact you about a place or a refund. Don't pay again.\n\nHelp Center: ${input.helpUrl}`,
+  };
+}

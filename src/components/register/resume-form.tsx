@@ -22,35 +22,47 @@ export function ResumeForm() {
   if (state.done) {
     return (
       <div role="status" className="mt-8 space-y-4 rounded-2xl bg-palm/10 p-5">
-        <p className="font-display text-xl font-bold">
-          {state.emailEnabled ? "Check your inbox" : "Request received"}
-        </p>
-        <ul className="space-y-3 text-ink/80">
-          <li>
-            <strong>If you paid</strong> with that email:{" "}
-            {state.emailEnabled ? (
-              "we've emailed you a secure link to finish your registration. It works once and expires in 2 hours — check your spam folder too."
-            ) : (
-              <>
-                please{" "}
-                <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
-                  send a request in the Help Center
-                </Link>
-                . The organisers can see your payment and will send you a secure link to finish.
-              </>
-            )}
-          </li>
-          <li>
-            <strong>If you didn&apos;t complete a payment</strong>, there&apos;s nothing to resume and no email will be
-            sent. Simply{" "}
-            <Link href="/register" className="font-semibold underline underline-offset-2">
-              start your registration
-            </Link>{" "}
-            again — you haven&apos;t been charged.
-          </li>
-        </ul>
+        {state.emailEnabled ? (
+          <>
+            <p className="font-display text-xl font-bold">Check your inbox</p>
+            <p className="text-ink/80">
+              We&apos;ve sent an email to <strong className="break-all">{state.sentTo}</strong> telling you exactly what
+              to do next — a secure link to finish your form, your registration details if you&apos;re already
+              registered, or how to start if no payment was found.
+            </p>
+            <ul className="list-disc space-y-1 pl-5 text-sm text-ink/70">
+              <li>It usually arrives within a minute. Check your spam or promotions folder too.</li>
+              <li>
+                Wrong address?{" "}
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="font-semibold underline underline-offset-2"
+                >
+                  Try again
+                </button>{" "}
+                with the email you paid with.
+              </li>
+            </ul>
+          </>
+        ) : (
+          <>
+            <p className="font-display text-xl font-bold">Request received</p>
+            <p className="text-ink/80">
+              We can&apos;t send emails right now. If you paid,{" "}
+              <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
+                send a request in the Help Center
+              </Link>{" "}
+              — the organisers can see your payment and will send you a secure link to finish. If you didn&apos;t pay,{" "}
+              <Link href="/register" className="font-semibold underline underline-offset-2">
+                start your registration
+              </Link>
+              .
+            </p>
+          </>
+        )}
         <p className="text-sm text-ink/65">
-          Still stuck?{" "}
+          Nothing after 10 minutes?{" "}
           <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
             Send a request in the Help Center
           </Link>

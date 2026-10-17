@@ -109,7 +109,7 @@ export async function submitRegistrationAction(_prev: SubmitState, formData: For
   }
 }
 
-export type ResumeState = { done?: boolean; error?: string; emailEnabled?: boolean };
+export type ResumeState = { done?: boolean; error?: string; emailEnabled?: boolean; sentTo?: string };
 
 export async function requestRecoveryAction(_prev: ResumeState, formData: FormData): Promise<ResumeState> {
   const parsed = startRegistrationSchema.safeParse({ email: formData.get("email") });
@@ -121,7 +121,8 @@ export async function requestRecoveryAction(_prev: ResumeState, formData: FormDa
     console.error("[recovery] failed", (err as Error).message),
   );
   // Identical response whether or not the email exists.
-  return { done: true, emailEnabled: emailConfigured() };
+  // The screen is identical for every outcome (privacy); the email says which applies.
+  return { done: true, emailEnabled: emailConfigured(), sentTo: parsed.data.email };
 }
 
 export async function consumeRecoveryLinkAction(formData: FormData) {
