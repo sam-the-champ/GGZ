@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
+import { emailConfigured, env } from "@/lib/env";
+import { sendPendingConfirmations } from "@/lib/services/registrations";
 import { safeEqualHex, sha256 } from "@/lib/crypto";
 import { verifyAndApply } from "@/lib/services/payments";
 import type { Prisma } from "@/generated/prisma/client";
@@ -70,5 +71,13 @@ export async function GET(request: NextRequest) {
     return res.count;
   });
 
-  return NextResponse.json({ verified, expiredReservations: expired.count, purgedUnpaidAttempts: purged });
+  // Catch up on confirmation emails that failed or predate email being connected.
+  const confirmations = emailConfigured() ? await sendPendingConfirmations(50) : { attempted: 0, sent: 0, failed: 0 };
+
+  return NextResponse.json({
+    verified,
+    expiredReservations: expired.count,
+    purgedUnpaidAttempts: purged,
+    confirmationEmailsSent: confirmations.sent,
+  });
 }

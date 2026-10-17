@@ -5,6 +5,7 @@ import { koboToNairaInput } from "@/lib/money";
 import { EmailPanel } from "@/components/admin/email-panel";
 import { emailProvider } from "@/lib/env";
 import { senderAddress } from "@/lib/email/send";
+import { countPendingConfirmations } from "@/lib/services/registrations";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Event settings" };
@@ -31,6 +32,7 @@ export default async function SettingsPage() {
         provider={emailProvider()}
         sender={emailProvider() ? senderAddress() : null}
         canTest={hasRole(admin, "ADMIN")}
+        pendingConfirmations={await countPendingConfirmations()}
       />
       <SettingsForm
         readOnly={!hasRole(admin, "ADMIN")}

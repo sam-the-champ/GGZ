@@ -21,6 +21,7 @@ import { emailConfigured } from "@/lib/env";
 import { sendEmail } from "@/lib/email/send";
 import { testEmail } from "@/lib/email/templates";
 import { respondToTicket, setTicketStatus } from "@/lib/services/support";
+import { sendPendingConfirmations } from "@/lib/services/registrations";
 import {
   allocateOverflowPlace,
   cancelRegistration,
@@ -248,5 +249,24 @@ export async function setTicketStatusAction(_p: ActionResult, formData: FormData
     revalidatePath(`/admin/help/${id}`);
     revalidatePath("/admin/help");
     return r;
+  });
+}
+
+export async function sendPendingConfirmationsAction(_p: ActionResult, formData: FormData) {
+  void formData;
+  return guarded(async (admin) => {
+    if (!emailConfigured()) return { ok: false, message: "Email isn't connected yet." };
+    const r = await sendPendingConfirmations(100);
+    await audit(db, {
+      actorId: admin.id,
+      action: "registration.confirmations_catch_up",
+      entityType: "Registration",
+      details: { sent: r.sent, failed: r.failed },
+    });
+    revalidatePath("/admin/settings");
+    if (r.attempted === 0) return { ok: true, message: "Everyone already has their confirmation email." };
+    return r.failed === 0
+      ? { ok: true, message: `Sent ${r.sent} confirmation email${r.sent === 1 ? "" : "s"}.` }
+      : { ok: false, message: `Sent ${r.sent}, ${r.failed} failed. Check the email settings and try again.` };
   });
 }

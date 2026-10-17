@@ -188,3 +188,43 @@ export async function getConfirmation(attemptId: string | null) {
     emailSent: Boolean(registration.confirmationEmailSentAt),
   };
 }
+
+/**
+ * Sends confirmation emails that never went out (email was down or not yet
+ * connected at the time). Used by the daily job and the admin catch-up button.
+ * Each registration is marked as sent only after the mail server accepts it.
+ */
+export async function sendPendingConfirmations(limit = 50) {
+  const pending = await db.registration.findMany({
+    where: { status: "CONFIRMED", confirmationEmailSentAt: null, participant: { erasedAt: null } },
+    include: { participant: { select: { fullName: true, email: true } } },
+    orderBy: { confirmedAt: "asc" },
+    take: limit,
+  });
+  let sent = 0;
+  let failed = 0;
+  for (const r of pending) {
+    const res = await sendEmail(
+      confirmationEmail({
+        to: r.participant.email,
+        fullName: r.participant.fullName,
+        registrationNumber: r.registrationNumber,
+      }),
+    );
+    if (res.sent) {
+      await db.registration.update({ where: { id: r.id }, data: { confirmationEmailSentAt: new Date() } });
+      sent++;
+    } else {
+      failed++;
+      // Stop early if email isn't working at all, rather than hammering it.
+      if (sent === 0 && failed >= 3) break;
+    }
+  }
+  return { attempted: sent + failed, sent, failed };
+}
+
+export async function countPendingConfirmations() {
+  return db.registration.count({
+    where: { status: "CONFIRMED", confirmationEmailSentAt: null, participant: { erasedAt: null } },
+  });
+}

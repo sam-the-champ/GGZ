@@ -1,19 +1,22 @@
 "use client";
 
 import { useActionState } from "react";
-import { sendTestEmailAction, type ActionResult } from "@/app/admin/actions";
+import { sendPendingConfirmationsAction, sendTestEmailAction, type ActionResult } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
 
 export function EmailPanel({
   provider,
   sender,
   canTest,
+  pendingConfirmations = 0,
 }: {
   provider: "smtp" | "resend" | null;
   sender: string | null;
   canTest: boolean;
+  pendingConfirmations?: number;
 }) {
   const [state, action, pending] = useActionState<ActionResult, FormData>(sendTestEmailAction, {});
+  const [catchUp, catchUpAction, catchingUp] = useActionState<ActionResult, FormData>(sendPendingConfirmationsAction, {});
   return (
     <section className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-ink/5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -48,6 +51,28 @@ export function EmailPanel({
               className={`mt-2 rounded-xl p-3 text-sm ${state.ok === false ? "bg-destructive/10 text-destructive" : "bg-palm/10"}`}
             >
               {state.message}
+            </p>
+          )}
+        </form>
+      )}
+      {canTest && provider && pendingConfirmations > 0 && (
+        <form action={catchUpAction} className="mt-4 rounded-xl bg-sun/25 p-3">
+          <p className="text-sm">
+            <strong>{pendingConfirmations}</strong> registered participant{pendingConfirmations === 1 ? " hasn't" : "s haven't"}{" "}
+            received a confirmation email (registered before email was connected, or sending failed). The daily job
+            retries automatically, or send them now:
+          </p>
+          <Button type="submit" size="sm" disabled={catchingUp} className="mt-2 rounded-full">
+            {catchingUp
+              ? "Sending…"
+              : `Send ${pendingConfirmations} confirmation email${pendingConfirmations === 1 ? "" : "s"}`}
+          </Button>
+          {catchUp.message && (
+            <p
+              role="status"
+              className={`mt-2 rounded-xl p-2 text-sm ${catchUp.ok === false ? "bg-destructive/10 text-destructive" : "bg-palm/10"}`}
+            >
+              {catchUp.message}
             </p>
           )}
         </form>

@@ -96,3 +96,33 @@ describe("Resume page always emails the inbox owner the right next step", () => 
     expect(outbox[0]!.subject).toMatch(/Payment received/);
   });
 });
+
+describe("confirmation email on completing registration", () => {
+  it("is sent immediately and recorded", async () => {
+    const a = await pay("ada@example.com");
+    outbox.length = 0;
+    const done = await submitRegistration(a.id, validForm);
+    if (done.kind !== "created") throw new Error();
+    expect(outbox).toHaveLength(1);
+    expect(outbox[0]!.to).toBe("ada@example.com");
+    expect(outbox[0]!.subject).toMatch(/registration confirmed/);
+    expect(outbox[0]!.text).toContain(done.registrationNumber);
+    const reg = await db.registration.findUniqueOrThrow({ where: { id: done.registrationId } });
+    expect(reg.confirmationEmailSentAt).not.toBeNull();
+  });
+
+  it("catch-up sends only confirmations that never went out", async () => {
+    const { sendPendingConfirmations } = await import("@/lib/services/registrations");
+    const a = await pay("ada@example.com");
+    const b = await pay("tobi@example.com");
+    await submitRegistration(a.id, validForm);
+    await submitRegistration(b.id, validForm);
+    // Simulate one registration made before email was connected.
+    await db.registration.updateMany({ where: { attemptId: b.id }, data: { confirmationEmailSentAt: null } });
+    outbox.length = 0;
+    const res = await sendPendingConfirmations();
+    expect(res).toEqual({ attempted: 1, sent: 1, failed: 0 });
+    expect(outbox.map((m) => m.to)).toEqual(["tobi@example.com"]);
+    expect((await sendPendingConfirmations()).attempted).toBe(0);
+  });
+});
