@@ -157,6 +157,13 @@ The site sends three emails: **payment received** (with a secure link to finish 
 
 To use your own domain later (better deliverability), switch to Resend: verify the domain in Resend, set `RESEND_API_KEY` and `EMAIL_FROM`, and remove the `SMTP_*` variables.
 
+## Help Center & Help Desk
+
+- **Public: `/help`.** Topic cards with instant answers (edit them in `src/content/help.ts`), then a request form (name, email, optional phone, topic, optional registration/payment reference, message). People get a reference like `HC-7K3M9P` and are told to expect a response within **24–48 hours**; if email is connected they also receive a copy. GenZ Uncle's number appears only as an **emergency** contact.
+- **Admin: Help desk** (`/admin/help`). Filter and search requests; oldest open requests come first, with badges once they've waited over 24 h (amber) and 48 h (red). Each request shows the person's details, the matching registration/payment (linked automatically by email or reference) and the full conversation. Respond by **email** (sent from the site), **call** or **WhatsApp** (one-tap buttons, then log what was said), or add **internal notes**. The nav shows the number of open requests and the overview warns about overdue ones.
+- **Alerts:** each new request emails the organisers' mailbox (`HELPDESK_NOTIFY_EMAIL`, or the SMTP account by default).
+- **Abuse protection:** 5 requests per hour per connection, 5 per day per email, plus a hidden honeypot field.
+
 ## Admin users
 
 - There is no public sign-up. Create accounts with `npm run admin:create -- --email … --name … --role ADMIN|VIEWER`.

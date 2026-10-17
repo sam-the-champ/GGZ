@@ -3,7 +3,7 @@ import { EVENT_SLUG } from "@/content/site";
 
 export async function resetDb() {
   await db.$executeRawUnsafe(`
-    TRUNCATE "AuditLog", "AdminSession", "AdminUser", "Registration", "Participant", "Payment",
+    TRUNCATE "SupportMessage", "SupportTicket", "AuditLog", "AdminSession", "AdminUser", "Registration", "Participant", "Payment",
              "ContinuationToken", "RegistrationAttempt", "RateLimitBucket", "Event" CASCADE
   `);
 }

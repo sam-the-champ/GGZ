@@ -87,14 +87,11 @@ export function RegisterSection({ info }: { info: PublicEventInfo }) {
                 <div className="mt-6 border-t border-ink/10 pt-5 text-sm">
                   <p className="font-bold">Need help registering?</p>
                   <p className="mt-1 text-ink/75">
-                    Contact {site.contact.name}:{" "}
-                    <a className="font-semibold underline underline-offset-2" href={`tel:${site.contact.phoneE164}`}>
-                      {site.contact.phoneDisplay}
-                    </a>{" "}
-                    ·{" "}
-                    <a className="font-semibold underline underline-offset-2" href={site.contact.whatsapp} target="_blank" rel="noopener noreferrer">
-                      WhatsApp
-                    </a>
+                    Visit the{" "}
+                    <Link href="/help" className="font-semibold underline underline-offset-2">
+                      Help Center
+                    </Link>{" "}
+                    — we respond within 24–48 hours.
                   </p>
                   <p className="mt-2 text-ink/75">
                     Paid but couldn&apos;t finish?{" "}

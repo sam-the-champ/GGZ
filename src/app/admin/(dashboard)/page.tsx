@@ -3,6 +3,7 @@ import { TriangleAlert } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth/session";
 import { getDashboardStats } from "@/lib/services/admin";
 import { formatNaira } from "@/lib/money";
+import { ticketCounts } from "@/lib/services/support";
 import { emailConfigured, paymentsConfigured, webhookHashConfigured } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,7 @@ function Stat({
 
 export default async function AdminOverviewPage() {
   await requireAdminPage();
-  const stats = await getDashboardStats();
+  const [stats, tickets] = await Promise.all([getDashboardStats(), ticketCounts()]);
   if (!stats) {
     return (
       <p className="rounded-2xl bg-destructive/10 p-5 font-semibold text-destructive">
@@ -99,6 +100,19 @@ export default async function AdminOverviewPage() {
             </Alert>
           )}
         </div>
+      )}
+
+      {tickets.open > 0 && (
+        <Link
+          href="/admin/help"
+          className={`flex items-center justify-between rounded-2xl p-4 text-sm font-semibold ring-1 ${tickets.overdue > 0 ? "bg-sunset/15 ring-sunset/40" : "bg-white ring-ink/10"}`}
+        >
+          <span>
+            Help desk: {tickets.open} open request{tickets.open === 1 ? "" : "s"}
+            {tickets.overdue > 0 && ` · ${tickets.overdue} waiting over 24 hours`}
+          </span>
+          <span className="underline">Respond →</span>
+        </Link>
       )}
 
       <section aria-labelledby="places">

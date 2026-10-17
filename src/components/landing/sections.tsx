@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CalendarDays, Clock, HeartHandshake, Info, MapPin, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { Reveal } from "@/components/landing/reveal";
@@ -281,7 +282,7 @@ export function CampDetails() {
               <li className="flex gap-3"><Check /><span>Have your phone number, date of birth and an emergency contact ready.</span></li>
               <li className="flex gap-3"><Check /><span>Under-18s will need a parent or guardian&apos;s details and consent.</span></li>
               <li className="flex gap-3"><Check /><span>Spaces are limited, so register early once registration opens.</span></li>
-              <li className="flex gap-3"><Check /><span>Questions? Call or WhatsApp {site.contact.name} on {site.contact.phoneDisplay}.</span></li>
+              <li className="flex gap-3"><Check /><span>Questions? Visit the <Link href="/help" className="font-semibold underline underline-offset-2">Help Center</Link> — we respond within 24–48 hours.</span></li>
             </ul>
           </div>
         </Reveal>

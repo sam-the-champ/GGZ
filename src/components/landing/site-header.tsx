@@ -12,6 +12,7 @@ const links = [
   { href: "/#impact", label: "The IMPACT experience" },
   { href: "/#details", label: "Camp details" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/help", label: "Help" },
 ];
 
 export function SiteHeader() {

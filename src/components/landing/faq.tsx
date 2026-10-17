@@ -54,8 +54,11 @@ export function Faq({ info }: { info: PublicEventInfo }) {
             Resume registration
           </Link>{" "}
           and enter the email you paid with. We&apos;ll re-check your payment and send you a secure link to finish. If you
-          have any trouble, contact {site.contact.name} on {site.contact.phoneDisplay} — the organisers can see paid
-          registrations and help you complete yours.
+          have any trouble,{" "}
+          <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
+            send us a request in the Help Center
+          </Link>{" "}
+          — the organisers can see paid registrations and help you complete yours.
         </>
       ),
     },
@@ -63,7 +66,12 @@ export function Faq({ info }: { info: PublicEventInfo }) {
       q: "How do I contact the organisers?",
       a: (
         <>
-          Call or WhatsApp {site.contact.name} on{" "}
+          Use the{" "}
+          <Link href="/help" className="font-semibold underline underline-offset-2">
+            Help Center
+          </Link>{" "}
+          — pick your topic for a quick answer or send a request, and the team will respond within 24–48 hours. For
+          emergencies only, call {site.contact.name} on{" "}
           <a href={`tel:${site.contact.phoneE164}`} className="font-semibold underline underline-offset-2">
             {site.contact.phoneDisplay}
           </a>
@@ -82,7 +90,11 @@ export function Faq({ info }: { info: PublicEventInfo }) {
             Questions, answered.
           </h2>
           <p className="mt-5 text-lg text-ink/75">
-            Can&apos;t find what you need? Reach {site.contact.name} on {site.contact.phoneDisplay}.
+            Can&apos;t find what you need?{" "}
+            <Link href="/help" className="font-semibold underline underline-offset-2">
+              Visit the Help Center
+            </Link>
+            .
           </p>
         </Reveal>
         <Reveal delay={0.08}>

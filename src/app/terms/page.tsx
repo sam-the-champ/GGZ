@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
 import { getPublicEventInfoSafe } from "@/lib/services/public-info";
@@ -47,8 +48,8 @@ export default async function TermsPage() {
         <p className="whitespace-pre-line">{info.refundPolicy}</p>
       ) : (
         <p>
-          The refund and cancellation policy has not been published yet. Registration will not open until it is. Contact{" "}
-          {site.contact.name} on {site.contact.phoneDisplay} with any questions.
+          The refund and cancellation policy has not been published yet. Registration will not open until it is. Send any
+          questions through the <Link href="/help">Help Center</Link>.
         </p>
       )}
       <p>If a late payment arrives after camp is full, the organisers will contact you to offer a place if one becomes available or arrange a refund.</p>
@@ -57,7 +58,10 @@ export default async function TermsPage() {
       <p>The detailed programme, accommodation, meals, transport and check-in arrangements will be communicated by the organisers. Activities may change for safety or practical reasons.</p>
 
       <h2>Contact</h2>
-      <p>{site.contact.name} · {site.contact.phoneDisplay}</p>
+      <p>
+        For questions, problems, refunds or cancellations, use the <Link href="/help">Help Center</Link>. We respond within
+        24–48 hours. For emergencies only, call {site.contact.name} on {site.contact.phoneDisplay}.
+      </p>
     </LegalPage>
   );
 }

@@ -17,7 +17,7 @@ export default async function globalSetup() {
   execSync("npx prisma migrate deploy", { stdio: "inherit", env });
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
   await client.connect();
-  await client.query(`TRUNCATE "AuditLog","AdminSession","AdminUser","Registration","Participant","Payment","ContinuationToken","RegistrationAttempt","RateLimitBucket","Event" CASCADE`);
+  await client.query(`TRUNCATE "SupportMessage","SupportTicket","AuditLog","AdminSession","AdminUser","Registration","Participant","Payment","ContinuationToken","RegistrationAttempt","RateLimitBucket","Event" CASCADE`);
   await client.end();
   execSync("npx prisma db seed", { stdio: "inherit", env });
   const c2 = new pg.Client({ connectionString: process.env.DATABASE_URL });

@@ -6,7 +6,6 @@ import { useFormStatus } from "react-dom";
 import { LoaderCircle } from "lucide-react";
 import { requestRecoveryAction, type ResumeState } from "@/app/register/actions";
 import { inputClass, primaryButton } from "@/components/register/flow-shell";
-import { site } from "@/content/site";
 
 function Submit() {
   const { pending } = useFormStatus();
@@ -29,9 +28,17 @@ export function ResumeForm() {
         <ul className="space-y-3 text-ink/80">
           <li>
             <strong>If you paid</strong> with that email:{" "}
-            {state.emailEnabled
-              ? "we've emailed you a secure link to finish your registration. It works once and expires in 2 hours — check your spam folder too."
-              : `please contact ${site.contact.name} on ${site.contact.phoneDisplay}. The organisers can see your payment and will send you a secure link to finish.`}
+            {state.emailEnabled ? (
+              "we've emailed you a secure link to finish your registration. It works once and expires in 2 hours — check your spam folder too."
+            ) : (
+              <>
+                please{" "}
+                <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
+                  send a request in the Help Center
+                </Link>
+                . The organisers can see your payment and will send you a secure link to finish.
+              </>
+            )}
           </li>
           <li>
             <strong>If you didn&apos;t complete a payment</strong>, there&apos;s nothing to resume and no email will be
@@ -43,7 +50,11 @@ export function ResumeForm() {
           </li>
         </ul>
         <p className="text-sm text-ink/65">
-          Still stuck? Contact {site.contact.name} on {site.contact.phoneDisplay}.
+          Still stuck?{" "}
+          <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline underline-offset-2">
+            Send a request in the Help Center
+          </Link>
+          .
         </p>
       </div>
     );

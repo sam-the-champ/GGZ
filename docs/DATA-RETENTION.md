@@ -8,6 +8,7 @@
 | Continuation / recovery tokens | `ContinuationToken` | Until expiry (≤ 24 h) | Daily `/api/cron/reconcile` |
 | Rate-limit counters (HMAC-ed identifiers, no raw IPs) | `RateLimitBucket` | Until window end | Daily cron |
 | Admin sessions | `AdminSession` | ≤ 8 hours | Login + daily cron |
+| Help Center requests and replies (name, email, phone, messages) | `SupportTicket`, `SupportMessage` | Until **6 months after the camp ends** | Manual delete in the database; requests mentioning an erased participant should be deleted at the same time |
 | Audit log (no passwords, secrets or full personal data) | `AuditLog` | 2 years | Manual |
 
 Access/deletion requests: handled by the organisers via the admin dashboard; confirm the requester's identity first. Erasing before camp means the place cannot be kept.

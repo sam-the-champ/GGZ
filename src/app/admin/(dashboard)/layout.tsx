@@ -5,12 +5,14 @@ import { logoutAction } from "@/app/admin/actions";
 import { BrandMark } from "@/components/brand/brand-mark";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { paymentsMode } from "@/lib/env";
+import { ticketCounts } from "@/lib/services/support";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({ children }: LayoutProps<"/admin">) {
   const admin = await requireAdminPage();
   const mode = paymentsMode();
+  const openTickets = await ticketCounts().then((c) => c.open).catch(() => 0);
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-ink/10 bg-white">
@@ -36,7 +38,7 @@ export default async function DashboardLayout({ children }: LayoutProps<"/admin"
             </form>
           </div>
         </div>
-        <AdminNav />
+        <AdminNav openTickets={openTickets} />
       </header>
       <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
         {children}

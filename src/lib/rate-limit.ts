@@ -15,6 +15,8 @@ export const RATE_LIMITS = {
   webhook: { limit: 300, windowSeconds: 60 },
   adminLogin: { limit: 10, windowSeconds: 15 * 60 },
   adminSensitive: { limit: 60, windowSeconds: 10 * 60 },
+  helpRequest: { limit: 5, windowSeconds: 60 * 60 },
+  helpRequestEmail: { limit: 5, windowSeconds: 24 * 60 * 60 },
 } satisfies Record<string, RateLimitRule>;
 
 export type RateLimitResult = { ok: boolean; retryAfterSeconds: number };

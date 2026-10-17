@@ -8,12 +8,13 @@ const items = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/payments", label: "Payments" },
+  { href: "/admin/help", label: "Help desk" },
   { href: "/admin/settings", label: "Event settings" },
   { href: "/admin/audit", label: "Audit log" },
   { href: "/admin/account", label: "My account" },
 ];
 
-export function AdminNav() {
+export function AdminNav({ openTickets = 0 }: { openTickets?: number }) {
   const pathname = usePathname();
   return (
     <nav aria-label="Admin" className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6">
@@ -31,6 +32,12 @@ export function AdminNav() {
                 )}
               >
                 {i.label}
+                {i.href === "/admin/help" && openTickets > 0 && (
+                  <span className="ml-1.5 rounded-full bg-sunset px-1.5 py-0.5 text-[0.7rem] font-bold text-ink">
+                    {openTickets}
+                    <span className="sr-only"> open</span>
+                  </span>
+                )}
               </Link>
             </li>
           );

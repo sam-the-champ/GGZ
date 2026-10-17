@@ -6,7 +6,6 @@ import { getSessionAttemptId } from "@/lib/registration-cookie";
 import { getFormAccess } from "@/lib/services/registrations";
 import { getEvent } from "@/lib/services/event";
 import { recheckPaymentAction } from "@/app/register/actions";
-import { site } from "@/content/site";
 
 export const dynamic = "force-dynamic";
 
@@ -54,7 +53,11 @@ export default async function RegistrationFormPage() {
           <p>
             Your payment arrived after your reserved place expired and camp is currently full. Your payment is safely
             recorded (reference <strong>{access.publicRef}</strong>). The organisers will contact you about a place or a
-            refund — or reach {site.contact.name} on {site.contact.phoneDisplay}.
+            refund — or you can{" "}
+            <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline">
+              send a request in the Help Center
+            </Link>
+            .
           </p>
         </StatusPanel>
       </FlowShell>
@@ -67,8 +70,11 @@ export default async function RegistrationFormPage() {
         <StatusPanel tone="error" title="This payment can't be used to register">
           <p>
             The payment for reference <strong>{access.publicRef}</strong> was not completed successfully. You can start
-            a new registration, or contact {site.contact.name} on {site.contact.phoneDisplay} if you believe this is a
-            mistake.
+            a new registration, or{" "}
+            <Link href="/help?topic=PAYMENT_FAILED" className="font-semibold underline">
+              send a request in the Help Center
+            </Link>{" "}
+            if you believe this is a mistake.
           </p>
           <Link href="/register" className={primaryButton}>Start again</Link>
         </StatusPanel>

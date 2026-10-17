@@ -28,16 +28,24 @@ export function SiteFooter() {
               <li><Link href="/#impact" className="hover:text-sand">The IMPACT experience</Link></li>
               <li><Link href="/#details" className="hover:text-sand">Camp details</Link></li>
               <li><Link href="/#faq" className="hover:text-sand">FAQ</Link></li>
+              <li><Link href="/help" className="hover:text-sand">Help Center</Link></li>
               <li><Link href="/register/resume" className="hover:text-sand">Resume registration</Link></li>
               <li><Link href="/privacy" className="hover:text-sand">Privacy policy</Link></li>
               <li><Link href="/terms" className="hover:text-sand">Registration terms &amp; payments</Link></li>
             </ul>
           </nav>
           <div>
-            <p className="text-sm font-bold uppercase tracking-widest text-sun">Enquiries</p>
-            <p className="mt-4 font-display text-xl font-bold">{site.contact.name}</p>
-            <a href={`tel:${site.contact.phoneE164}`} className="mt-2 inline-flex items-center gap-2 text-sand/80 hover:text-sand">
-              <Phone className="size-4" aria-hidden="true" /> {site.contact.phoneDisplay}
+            <p className="text-sm font-bold uppercase tracking-widest text-sun">Need help?</p>
+            <Link
+              href="/help"
+              className="mt-4 inline-flex h-11 items-center rounded-full bg-white/10 px-5 font-bold text-sand ring-1 ring-white/20 hover:bg-white/15"
+            >
+              Visit the Help Center
+            </Link>
+            <p className="mt-2 text-sm text-sand/60">We respond within 24–48 hours.</p>
+            <p className="mt-5 text-xs font-bold uppercase tracking-widest text-sand/50">Emergencies only</p>
+            <a href={`tel:${site.contact.phoneE164}`} className="mt-1 inline-flex items-center gap-2 text-sand/80 hover:text-sand">
+              <Phone className="size-4" aria-hidden="true" /> {site.contact.name} · {site.contact.phoneDisplay}
             </a>
             <p className="mt-6 text-sm text-sand/60">
               {site.dates.label}

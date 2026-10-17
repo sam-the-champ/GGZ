@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/legal-page";
 import { site } from "@/content/site";
@@ -58,9 +59,9 @@ export default function PrivacyPage() {
 
       <h2>Your rights</h2>
       <p>
-        You can ask to see, correct or delete your personal information, or withdraw consent where we rely on it. Contact{" "}
-        {site.contact.name} on {site.contact.phoneDisplay}. We may need to confirm your identity first. Deleting your data
-        before camp may mean we cannot keep your registration.
+        You can ask to see, correct or delete your personal information, or withdraw consent where we rely on it. Send a
+        request through the <Link href="/help">Help Center</Link>. We may need to confirm your identity first. Deleting
+        your data before camp may mean we cannot keep your registration.
       </p>
 
       <h2>Security</h2>

@@ -7,7 +7,6 @@ import { verifyAndApply } from "@/lib/services/payments";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIp } from "@/lib/request";
 import { recheckPaymentAction } from "@/app/register/actions";
-import { site } from "@/content/site";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +77,11 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
       <FlowShell step={1}>
         <StatusPanel tone="error" title="We couldn't find that payment">
           <p>
-            If you were charged, contact {site.contact.name} on {site.contact.phoneDisplay} with your Flutterwave receipt.
+            If you were charged,{" "}
+            <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline">
+              send us a request in the Help Center
+            </Link>{" "}
+            with your Flutterwave receipt.
           </p>
         </StatusPanel>
       </FlowShell>
@@ -116,8 +119,11 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
             payment is safely recorded (reference <strong>{attempt.publicRef}</strong>).
           </p>
           <p>
-            The organisers will contact you about a place or a refund. You can also reach {site.contact.name} on{" "}
-            {site.contact.phoneDisplay}.
+            The organisers will contact you about a place or a refund. You can also{" "}
+            <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline">
+              send a request in the Help Center
+            </Link>
+            .
           </p>
         </StatusPanel>
       </FlowShell>
@@ -161,8 +167,11 @@ export default async function CallbackPage(props: PageProps<"/register/callback"
         {status === "MISMATCH" ? (
           <p>
             Flutterwave reported a payment that doesn&apos;t match the expected amount. The organisers have been flagged to
-            review it — please contact {site.contact.name} on {site.contact.phoneDisplay} with reference{" "}
-            <strong>{attempt.publicRef}</strong>.
+            review it — please{" "}
+            <Link href="/help?topic=PAID_NOT_CONFIRMED" className="font-semibold underline">
+              send a request in the Help Center
+            </Link>{" "}
+            with reference <strong>{attempt.publicRef}</strong>.
           </p>
         ) : (
           <p>

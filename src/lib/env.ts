@@ -26,6 +26,8 @@ const schema = z.object({
   // e.g. "GGZ Camp <ggz@gmail.com>". Defaults to the SMTP account.
   EMAIL_FROM: z.string().optional(),
   CRON_SECRET: z.string().optional(),
+  // Where new Help Center requests are announced. Defaults to the SMTP mailbox.
+  HELPDESK_NOTIFY_EMAIL: z.string().email().optional(),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

@@ -88,6 +88,7 @@ model RegistrationAttempt {
   payment      Payment?
   registration Registration?
   tokens       ContinuationToken[]
+  tickets      SupportTicket[]
 
   @@index([eventId, reservationStatus, reservationExpiresAt])
   @@index([eventId, paymentStatus])
@@ -228,6 +229,7 @@ model AdminUser {
 
   sessions  AdminSession[]
   auditLogs AuditLog[]
+  supportMessages SupportMessage[]
 }
 
 model AdminSession {
@@ -265,4 +267,74 @@ model RateLimitBucket {
   expiresAt   DateTime
 
   @@index([expiresAt])
+}
+
+// ─── Help center ────────────────────────────────────────────────────────────
+
+enum TicketCategory {
+  PAID_NOT_CONFIRMED // paid but registration not confirmed
+  PAYMENT_FAILED
+  CHARGED_TWICE
+  NO_EMAIL // didn't receive confirmation / link
+  CHANGE_DETAILS
+  REFUND_CANCELLATION
+  WEBSITE_PROBLEM
+  GENERAL_QUESTION
+  OTHER
+}
+
+enum TicketStatus {
+  OPEN // waiting for the organisers
+  IN_PROGRESS // organisers responded / working on it
+  RESOLVED
+  CLOSED // spam or duplicate
+}
+
+model SupportTicket {
+  id                String         @id @default(cuid())
+  // Public reference shown to the person, e.g. HC-7K3M9P.
+  reference         String         @unique
+  name              String
+  email             String
+  phone             String?
+  category          TicketCategory
+  message           String
+  // As typed by the person (registration number or payment reference).
+  registrationRef   String?
+  // Matched automatically when the email or reference belongs to an attempt.
+  attemptId         String?
+  attempt           RegistrationAttempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  status            TicketStatus   @default(OPEN)
+  firstResponseAt   DateTime?
+  resolvedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  messages SupportMessage[]
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+enum MessageChannel {
+  WEB // the original request
+  EMAIL // organiser reply sent by email
+  PHONE // organiser logged a phone call
+  WHATSAPP // organiser logged a WhatsApp conversation
+  NOTE // internal note, never shown to the person
+}
+
+model SupportMessage {
+  id        String         @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  channel   MessageChannel
+  // Null for the person's own message.
+  authorId  String?
+  author    AdminUser?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  body      String
+  emailSent Boolean        @default(false)
+  createdAt DateTime       @default(now())
+
+  @@index([ticketId, createdAt])
 }

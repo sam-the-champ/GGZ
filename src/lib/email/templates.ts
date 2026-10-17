@@ -89,3 +89,68 @@ export function testEmail(to: string): EmailMessage {
     text: `This is a test from the ${site.eventName} admin dashboard. Email delivery is working.`,
   };
 }
+
+// ─── Help center ────────────────────────────────────────────────────────────
+
+const nl2br = (s: string) => escapeHtml(s).replace(/\r?\n/g, "<br>");
+
+export function ticketReceivedEmail(input: {
+  to: string;
+  name: string;
+  reference: string;
+  categoryLabel: string;
+  message: string;
+  responseWindow: string;
+}): EmailMessage {
+  const title = "We've received your request";
+  return {
+    to: input.to,
+    subject: `${site.eventName} Help Center: request ${input.reference} received`,
+    html: layout(
+      title,
+      `<p>Hi ${escapeHtml(input.name)},</p>
+<p>Thanks for reaching out. Your request reference is <strong>${escapeHtml(input.reference)}</strong>.</p>
+<p>A member of the organising team will respond within <strong>${escapeHtml(input.responseWindow)}</strong> by email or phone.</p>
+<p style="font-size:13px;color:#5b6773;margin-top:20px">Topic: ${escapeHtml(input.categoryLabel)}</p>
+<blockquote style="margin:8px 0;padding:12px 16px;background:#f7f1e8;border-radius:12px;font-size:14px">${nl2br(input.message)}</blockquote>
+<p style="font-size:13px;color:#5b6773">For emergencies only, call ${escapeHtml(site.contact.name)} on ${escapeHtml(site.contact.phoneDisplay)}.</p>`,
+    ),
+    text: `Hi ${input.name},\n\nWe've received your request ${input.reference}. The organising team will respond within ${input.responseWindow}.\n\nTopic: ${input.categoryLabel}\n\n${input.message}\n\nEmergencies only: ${site.contact.name}, ${site.contact.phoneDisplay}`,
+  };
+}
+
+export function ticketReplyEmail(input: { to: string; name: string; reference: string; body: string }): EmailMessage {
+  const title = `Reply to your request ${input.reference}`;
+  return {
+    to: input.to,
+    subject: `${site.eventName} Help Center: ${input.reference}`,
+    html: layout(
+      title,
+      `<p>Hi ${escapeHtml(input.name)},</p>
+<div style="font-size:15px;line-height:1.6">${nl2br(input.body)}</div>
+<p style="font-size:13px;color:#5b6773;margin-top:24px">You can reply to this email if you need anything else. Please keep the reference ${escapeHtml(input.reference)} in the subject.</p>`,
+    ),
+    text: `Hi ${input.name},\n\n${input.body}\n\nReference: ${input.reference}. You can reply to this email.`,
+  };
+}
+
+export function newTicketAlertEmail(input: {
+  to: string;
+  reference: string;
+  name: string;
+  categoryLabel: string;
+  adminUrl: string;
+}): EmailMessage {
+  const title = `New help request ${input.reference}`;
+  return {
+    to: input.to,
+    subject: `[Help Center] ${input.reference} · ${input.categoryLabel}`,
+    html: layout(
+      title,
+      `<p><strong>${escapeHtml(input.name)}</strong> submitted a request: ${escapeHtml(input.categoryLabel)}.</p>
+${button(input.adminUrl, "Open in Help Desk")}
+<p style="font-size:13px;color:#5b6773">Personal details are only shown inside the admin panel.</p>`,
+    ),
+    text: `New help request ${input.reference} from ${input.name}: ${input.categoryLabel}\n${input.adminUrl}`,
+  };
+}

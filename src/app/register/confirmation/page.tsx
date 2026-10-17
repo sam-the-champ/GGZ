@@ -24,8 +24,11 @@ export default async function ConfirmationPage() {
           <p>
             We can only show a confirmation in the browser used to register, for your privacy. If you completed
             registration, your registration number was shown on screen{" "}
-            and — where email is enabled — sent to your inbox. Contact {site.contact.name} on {site.contact.phoneDisplay}{" "}
-            if you need help.
+            and — where email is enabled — sent to your inbox. If you need help,{" "}
+            <Link href="/help?topic=NO_EMAIL" className="font-semibold underline">
+              visit the Help Center
+            </Link>
+            .
           </p>
           <Link href="/" className={primaryButton}>Back to camp home</Link>
         </StatusPanel>
@@ -87,8 +90,10 @@ export default async function ConfirmationPage() {
           </p>
         </div>
         <p className="mx-auto mt-8 max-w-md text-center text-sm text-ink/65">
-          Programme and logistics details will be shared by the organisers. Questions? {site.contact.name} ·{" "}
-          {site.contact.phoneDisplay}
+          Programme and logistics details will be shared by the organisers. Questions?{" "}
+          <Link href="/help" className="font-semibold underline">
+            Visit the Help Center
+          </Link>
         </p>
       </Card>
     </FlowShell>

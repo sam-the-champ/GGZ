@@ -69,10 +69,10 @@ export default async function RegisterPage() {
                 : "Payments are not being accepted right now. Please check back soon or contact the organisers."}
             </p>
             <p className="mt-4 text-ink/80">
-              Contact {site.contact.name} on{" "}
-              <a href={`tel:${site.contact.phoneE164}`} className="font-semibold underline">
-                {site.contact.phoneDisplay}
-              </a>
+              Questions?{" "}
+              <Link href="/help" className="font-semibold underline">
+                Visit the Help Center
+              </Link>
               .
             </p>
           </div>

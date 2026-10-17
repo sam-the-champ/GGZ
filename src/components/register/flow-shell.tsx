@@ -34,7 +34,11 @@ export function FlowShell({ step, children }: { step?: 0 | 1 | 2 | 3; children: 
         {children}
       </main>
       <footer className="no-print mx-auto w-full max-w-3xl px-4 pb-8 text-sm text-ink/60 sm:px-6">
-        Need help? {site.contact.name} ·{" "}
+        Need help?{" "}
+        <Link href="/help" className="font-semibold text-ink underline underline-offset-2">
+          Visit the Help Center
+        </Link>{" "}
+        · Emergencies only:{" "}
         <a
           className="inline-flex items-center gap-1 font-semibold text-ink underline underline-offset-2"
           href={`tel:${site.contact.phoneE164}`}

@@ -20,6 +20,7 @@ import { db } from "@/lib/db";
 import { emailConfigured } from "@/lib/env";
 import { sendEmail } from "@/lib/email/send";
 import { testEmail } from "@/lib/email/templates";
+import { respondToTicket, setTicketStatus } from "@/lib/services/support";
 import {
   allocateOverflowPlace,
   cancelRegistration,
@@ -220,4 +221,32 @@ export async function changePasswordAction(_p: PasswordState, formData: FormData
     if (err instanceof AuthorizationError) return { ok: false, message: "Please sign in again." };
     throw err;
   }
+}
+
+// ─── Help desk ──────────────────────────────────────────────────────────────
+
+export async function respondToTicketAction(_p: ActionResult, formData: FormData) {
+  return guarded(async (admin) => {
+    const id = idSchema.parse(formData.get("ticketId"));
+    const status = String(formData.get("status") ?? "");
+    const r = await respondToTicket(admin, id, {
+      channel: String(formData.get("channel") ?? ""),
+      body: String(formData.get("body") ?? ""),
+      status: status || undefined,
+    });
+    revalidatePath(`/admin/help/${id}`);
+    revalidatePath("/admin/help");
+    return r;
+  });
+}
+
+export async function setTicketStatusAction(_p: ActionResult, formData: FormData) {
+  return guarded(async (admin) => {
+    const id = idSchema.parse(formData.get("ticketId"));
+    const status = z.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]).parse(formData.get("status"));
+    const r = await setTicketStatus(admin, id, status);
+    revalidatePath(`/admin/help/${id}`);
+    revalidatePath("/admin/help");
+    return r;
+  });
 }
