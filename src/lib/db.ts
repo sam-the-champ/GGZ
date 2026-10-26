@@ -5,10 +5,20 @@ import { normaliseEnv } from "@/lib/env";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
+/**
+ * node-postgres currently treats sslmode=prefer/require/verify-ca as
+ * verify-full (certificate + hostname checked) and warns that a future major
+ * version will weaken them to libpq semantics. Ask for verify-full explicitly:
+ * identical security today, no warning, and no silent downgrade later.
+ */
+export function withStrictSsl(connectionString: string): string {
+  return connectionString.replace(/([?&]sslmode=)(prefer|require|verify-ca)(?=&|$)/i, "$1verify-full");
+}
+
 function createClient() {
-  const connectionString = normaliseEnv(process.env).DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
-  const adapter = new PrismaPg({ connectionString });
+  const raw = normaliseEnv(process.env).DATABASE_URL;
+  if (!raw) throw new Error("DATABASE_URL is not set");
+  const adapter = new PrismaPg({ connectionString: withStrictSsl(raw) });
   return new PrismaClient({ adapter });
 }
 
