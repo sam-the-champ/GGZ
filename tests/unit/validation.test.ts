@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ageOn, agePolicyErrors, registrationFormSchema } from "@/lib/validation/registration";
 import { validForm } from "../helpers/db";
 
-const policy = { minimumAge: 13, guardianConsentAge: 18, eventStart: new Date("2026-12-08T00:00:00Z") };
+const policy = { minimumAge: 13, guardianConsentAge: 18, eventStart: new Date("2026-12-10T00:00:00Z") };
 
 describe("registration form validation", () => {
   it("accepts a valid adult registration", () => {
@@ -28,8 +28,8 @@ describe("registration form validation", () => {
   });
 
   it("computes age on the first day of camp", () => {
-    expect(ageOn("2008-12-08", policy.eventStart)).toBe(18);
-    expect(ageOn("2008-12-09", policy.eventStart)).toBe(17);
+    expect(ageOn("2008-12-10", policy.eventStart)).toBe(18);
+    expect(ageOn("2008-12-11", policy.eventStart)).toBe(17);
   });
 
   it("requires guardian details and consent for minors", () => {

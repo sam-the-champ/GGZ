@@ -1,10 +1,11 @@
 import { ImageResponse } from "next/og";
+import { site } from "@/content/site";
 
 /**
  * Generated social-sharing image (WhatsApp, Instagram, X…). To replace it with
  * a designed image, delete this file and add src/app/opengraph-image.png (1200×630).
  */
-export const alt = "GGZ Camp 1.0 — IMPACT · 8–10 December 2026 · Royal Beach, Orimedu, Lagos";
+export const alt = `GGZ Camp 1.0 — IMPACT · ${site.dates.label} · ${site.venueLabel}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,7 +20,7 @@ export default function OgImage() {
           <div style={{ fontSize: 26, letterSpacing: 6, color: "#ffc83d", fontWeight: 700 }}>GOD&apos;S GENZ COMMUNITY PRESENTS</div>
           <div style={{ fontSize: 84, fontWeight: 800, marginTop: 18 }}>GGZ Camp 1.0</div>
           <div style={{ fontSize: 170, fontWeight: 900, color: "#f26b1d", lineHeight: 1 }}>IMPACT</div>
-          <div style={{ fontSize: 34, marginTop: 22, fontWeight: 600 }}>8–10 December 2026 · Royal Beach, Orimedu, Lagos</div>
+          <div style={{ fontSize: 34, marginTop: 22, fontWeight: 600 }}>{site.dates.label} · {site.venueLabel}</div>
         </div>
       </div>
     ),

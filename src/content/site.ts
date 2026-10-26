@@ -10,7 +10,7 @@ export const site = {
   organiserShort: "GGZ",
   eventName: "GGZ Camp 1.0",
   theme: "IMPACT",
-  dates: { start: "2026-12-08", end: "2026-12-10", label: "8–10 December 2026" },
+  dates: { start: "2026-12-10", end: "2026-12-12", label: "10–12 December 2026", days: "Thursday to Saturday" },
   venue: { name: "Royal Beach", area: "Orimedu", city: "Lagos", country: "Nigeria" },
   venueLabel: "Royal Beach, Orimedu, Lagos",
   scripture: {
@@ -26,7 +26,7 @@ export const site = {
     whatsapp: "https://wa.me/2347066739789",
   },
   description:
-    "GGZ Camp 1.0 — IMPACT. Three days by the beach to grow, connect, encounter God and discover how your life can make a difference. 8–10 December 2026 at Royal Beach, Orimedu, Lagos.",
+    "GGZ Camp 1.0 — IMPACT. Three days by the beach to grow, connect, encounter God and discover how your life can make a difference. 10–12 December 2026 at Royal Beach, Orimedu, Lagos.",
 } as const;
 
 /**

@@ -7,7 +7,7 @@ test("complete registration journey, then visible in the admin dashboard", async
   // 1–2. Landing page and event details
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: /GGZ Camp 1\.0/ })).toBeVisible();
-  await expect(page.getByText("8–10 December 2026").first()).toBeVisible();
+  await expect(page.getByText("10–12 December 2026").first()).toBeVisible();
   await expect(page.getByText("Royal Beach, Orimedu, Lagos").first()).toBeVisible();
   await page.locator("#register").scrollIntoViewIfNeeded();
   await expect(page.locator("#register").getByText("₦15,000")).toBeVisible();

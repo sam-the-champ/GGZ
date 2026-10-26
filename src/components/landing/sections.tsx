@@ -229,8 +229,8 @@ export function CampDetails() {
             <div className="h-full rounded-3xl bg-sunset p-7 text-ink">
               <CalendarDays className="size-7" aria-hidden="true" />
               <p className="mt-6 text-sm font-bold uppercase tracking-widest">When</p>
-              <p className="mt-1 font-display text-3xl font-extrabold leading-tight">8–10 December 2026</p>
-              <p className="mt-2 font-semibold">Tuesday to Thursday · three days</p>
+              <p className="mt-1 font-display text-3xl font-extrabold leading-tight">{site.dates.label}</p>
+              <p className="mt-2 font-semibold">{site.dates.days} · three days</p>
             </div>
           </Reveal>
           <Reveal delay={0.08} className="lg:col-span-1">

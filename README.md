@@ -1,7 +1,7 @@
 # GGZ Camp 1.0 — IMPACT
 
 Landing page and payment-first registration platform for **GGZ Camp 1.0 — IMPACT**, organised by **God's GenZ Community**.
-8–10 December 2026 · Royal Beach, Orimedu, Lagos.
+10–12 December 2026 · Royal Beach, Orimedu, Lagos.
 
 The app has three parts:
 
